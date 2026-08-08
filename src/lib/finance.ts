@@ -73,7 +73,10 @@ export interface DateRange {
   label: string;
 }
 
-export function resolveRange(key: RangeKey, custom?: { from?: string; to?: string }): DateRange {
+export function resolveRange(
+  key: RangeKey,
+  custom?: { from?: string | undefined; to?: string | undefined },
+): DateRange {
   const now = new Date();
   switch (key) {
     case "today":
