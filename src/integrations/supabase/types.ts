@@ -14,7 +14,584 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accounts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          opening_balance: number
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          opening_balance?: number
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          opening_balance?: number
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      borrowings: {
+        Row: {
+          amount: number
+          amount_repaid: number
+          created_at: string
+          date: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          person_id: string | null
+          person_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          amount_repaid?: number
+          created_at?: string
+          date?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          person_id?: string | null
+          person_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          amount_repaid?: number
+          created_at?: string
+          date?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          person_id?: string | null
+          person_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "borrowings_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          month: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          id?: string
+          month: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          month?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      debt_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          debt_id: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date?: string
+          debt_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          debt_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_payments_debt_id_fkey"
+            columns: ["debt_id"]
+            isOneToOne: false
+            referencedRelation: "debts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      debts: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          emi_amount: number
+          id: string
+          interest_rate: number
+          name: string
+          notes: string | null
+          paid_amount: number
+          provider: string | null
+          total_amount: number
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          emi_amount?: number
+          id?: string
+          interest_rate?: number
+          name: string
+          notes?: string | null
+          paid_amount?: number
+          provider?: string | null
+          total_amount: number
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          emi_amount?: number
+          id?: string
+          interest_rate?: number
+          name?: string
+          notes?: string | null
+          paid_amount?: number
+          provider?: string | null
+          total_amount?: number
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lendings: {
+        Row: {
+          amount: number
+          amount_received: number
+          created_at: string
+          date: string
+          expected_return_date: string | null
+          id: string
+          notes: string | null
+          person_id: string | null
+          person_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          amount_received?: number
+          created_at?: string
+          date?: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          person_id?: string | null
+          person_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          amount_received?: number
+          created_at?: string
+          date?: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          person_id?: string | null
+          person_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lendings_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      people: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          currency: string
+          email: string | null
+          full_name: string | null
+          id: string
+          monthly_savings_target: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          monthly_savings_target?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          monthly_savings_target?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recurring_payments: {
+        Row: {
+          account_id: string | null
+          active: boolean
+          amount: number
+          category: string | null
+          created_at: string
+          frequency: string
+          id: string
+          name: string
+          next_due_date: string
+          payment_method: string | null
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          active?: boolean
+          amount: number
+          category?: string | null
+          created_at?: string
+          frequency?: string
+          id?: string
+          name: string
+          next_due_date?: string
+          payment_method?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          active?: boolean
+          amount?: number
+          category?: string | null
+          created_at?: string
+          frequency?: string
+          id?: string
+          name?: string
+          next_due_date?: string
+          payment_method?: string | null
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_payments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reminders: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      savings_contributions: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          goal_id: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date?: string
+          goal_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          goal_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_contributions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_goals: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          saved_amount: number
+          target_amount: number
+          target_date: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          saved_amount?: number
+          target_amount: number
+          target_date?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          saved_amount?: number
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          account_id: string | null
+          amount: number
+          borrowing_id: string | null
+          category: string | null
+          created_at: string
+          date: string
+          debt_id: string | null
+          description: string | null
+          id: string
+          is_recurring: boolean
+          lending_id: string | null
+          notes: string | null
+          payment_method: string | null
+          person_id: string | null
+          source: string | null
+          to_account_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          borrowing_id?: string | null
+          category?: string | null
+          created_at?: string
+          date?: string
+          debt_id?: string | null
+          description?: string | null
+          id?: string
+          is_recurring?: boolean
+          lending_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          person_id?: string | null
+          source?: string | null
+          to_account_id?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          borrowing_id?: string | null
+          category?: string | null
+          created_at?: string
+          date?: string
+          debt_id?: string | null
+          description?: string | null
+          id?: string
+          is_recurring?: boolean
+          lending_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          person_id?: string | null
+          source?: string | null
+          to_account_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
