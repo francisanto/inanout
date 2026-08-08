@@ -38,12 +38,18 @@ function AuthPage() {
       password: form.password,
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     navigate({ to: "/dashboard" });
   };
 
   const signUp = async () => {
-    if (form.password.length < 6) return toast.error("Password must be at least 6 characters.");
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
     setBusy(true);
     const { data, error } = await supabase.auth.signUp({
       email: form.email.trim(),
@@ -54,7 +60,10 @@ function AuthPage() {
       },
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     if (!data.session) {
       toast.success("Check your email to confirm your account.");
       return;
@@ -66,17 +75,26 @@ function AuthPage() {
     const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (result.error) return toast.error("Google sign-in failed. Please try again.");
+    if (result.error) {
+      toast.error("Google sign-in failed. Please try again.");
+      return;
+    }
     if (result.redirected) return;
     navigate({ to: "/dashboard" });
   };
 
   const forgot = async () => {
-    if (!form.email.trim()) return toast.error("Enter your email first.");
+    if (!form.email.trim()) {
+      toast.error("Enter your email first.");
+      return;
+    }
     const { error } = await supabase.auth.resetPasswordForEmail(form.email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Password reset link sent to your email.");
   };
 
