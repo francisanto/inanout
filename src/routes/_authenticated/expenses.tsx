@@ -100,7 +100,7 @@ function ExpensesPage() {
           label="Highest day"
           value={highest?.expense ?? 0}
           currency={currency}
-          hint={highest?.label}
+          hint={highest?.label ?? ""}
           loading={tx.isLoading}
         />
         <StatCard label="Categories used" value={byCategory.length} raw={String(byCategory.length)} loading={tx.isLoading} />
