@@ -69,9 +69,18 @@ export function EntryDialog({
   const catList = (categories.data ?? []).filter((c) => c.kind === kind);
 
   const submit = async () => {
-    if (!positive(form.amount)) return toast.error("Enter an amount greater than zero.");
-    if (!form.date) return toast.error("Pick a date.");
-    if (form.date > toISO(new Date(Date.now() + 86400000 * 365))) return toast.error("Date is too far ahead.");
+    if (!positive(form.amount)) {
+      toast.error("Enter an amount greater than zero.");
+      return;
+    }
+    if (!form.date) {
+      toast.error("Pick a date.");
+      return;
+    }
+    if (form.date > toISO(new Date(Date.now() + 86400000 * 365))) {
+      toast.error("Date is too far ahead.");
+      return;
+    }
     await save.mutateAsync({
       ...(existing ? { id: existing.id } : {}),
       type: kind,
@@ -224,8 +233,14 @@ export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {
   });
 
   const submit = async () => {
-    if (!form.person_name.trim()) return toast.error("Who did you borrow from?");
-    if (!positive(form.amount)) return toast.error("Enter an amount greater than zero.");
+    if (!form.person_name.trim()) {
+      toast.error("Who did you borrow from?");
+      return;
+    }
+    if (!positive(form.amount)) {
+      toast.error("Enter an amount greater than zero.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
@@ -330,8 +345,14 @@ export function LendDialog({ trigger }: { trigger?: React.ReactNode }) {
   });
 
   const submit = async () => {
-    if (!form.person_name.trim()) return toast.error("Who did you lend to?");
-    if (!positive(form.amount)) return toast.error("Enter an amount greater than zero.");
+    if (!form.person_name.trim()) {
+      toast.error("Who did you lend to?");
+      return;
+    }
+    if (!positive(form.amount)) {
+      toast.error("Enter an amount greater than zero.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
@@ -444,19 +465,25 @@ export function SettleDialog({
 
   const submit = async () => {
     const value = Number(amount);
-    if (!positive(amount)) return toast.error("Enter an amount greater than zero.");
-    if (value > remaining + 0.001) return toast.error("Amount is more than what remains.");
+    if (!positive(amount)) {
+      toast.error("Enter an amount greater than zero.");
+      return;
+    }
+    if (value > remaining + 0.001) {
+      toast.error("Amount is more than what remains.");
+      return;
+    }
     setSaving(true);
     try {
       const table = kind === "borrowing" ? "borrowings" : "lendings";
       const column = kind === "borrowing" ? "amount_repaid" : "amount_received";
       const { data: current, error: readError } = await supabase
         .from(table)
-        .select(`${column}`)
+        .select("*")
         .eq("id", recordId)
         .single();
       if (readError) throw readError;
-      const settled = Number((current as Record<string, number>)[column] ?? 0) + value;
+      const settled = Number((current as unknown as Record<string, number>)[column] ?? 0) + value;
       const { error } = await supabase
         .from(table)
         .update({ [column]: settled } as never)
@@ -527,13 +554,25 @@ export function DebtPaymentDialog({
   const [form, setForm] = useState({ debt_id: debtId ?? "", amount: "", date: today(), notes: "" });
 
   const submit = async () => {
-    if (!form.debt_id) return toast.error("Choose a debt.");
-    if (!positive(form.amount)) return toast.error("Enter an amount greater than zero.");
+    if (!form.debt_id) {
+      toast.error("Choose a debt.");
+      return;
+    }
+    if (!positive(form.amount)) {
+      toast.error("Enter an amount greater than zero.");
+      return;
+    }
     const debt = (debts.data ?? []).find((d) => d.id === form.debt_id);
-    if (!debt) return toast.error("Debt not found.");
+    if (!debt) {
+      toast.error("Debt not found.");
+      return;
+    }
     const remaining = Number(debt.total_amount) - Number(debt.paid_amount);
     const value = Number(form.amount);
-    if (value > remaining + 0.001) return toast.error("Amount is more than the remaining debt.");
+    if (value > remaining + 0.001) {
+      toast.error("Amount is more than the remaining debt.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: auth } = await supabase.auth.getUser();
@@ -635,9 +674,18 @@ export function TransferDialog({ trigger }: { trigger?: React.ReactNode }) {
   });
 
   const submit = async () => {
-    if (!positive(form.amount)) return toast.error("Enter an amount greater than zero.");
-    if (!form.account_id || !form.to_account_id) return toast.error("Choose both accounts.");
-    if (form.account_id === form.to_account_id) return toast.error("Pick two different accounts.");
+    if (!positive(form.amount)) {
+      toast.error("Enter an amount greater than zero.");
+      return;
+    }
+    if (!form.account_id || !form.to_account_id) {
+      toast.error("Choose both accounts.");
+      return;
+    }
+    if (form.account_id === form.to_account_id) {
+      toast.error("Pick two different accounts.");
+      return;
+    }
     await save.mutateAsync({
       type: "transfer",
       amount: Number(form.amount),
