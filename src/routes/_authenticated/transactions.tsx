@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/transactions")({
   component: TransactionsPage,
 });
 
-type Filter = "all" | "expense" | "income" | "borrowed" | "lending" | "repayment" | "debt_payment" | "transfer";
+type Filter = "all" | "expense" | "income" | "borrowed" | "lending" | "repayment" | "debt_payment";
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
@@ -42,7 +42,6 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "lending", label: "Lent" },
   { value: "repayment", label: "Repaid" },
   { value: "debt_payment", label: "Debt" },
-  { value: "transfer", label: "Transfer" },
 ];
 
 function TransactionsPage() {

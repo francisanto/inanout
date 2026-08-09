@@ -124,7 +124,6 @@ function IncomePage() {
                     <p className="truncate text-xs text-muted-foreground">
                       {format(parseDate(t.date), "dd MMM yyyy")}
                       {t.description ? ` · ${t.description}` : ""}
-                      {t.is_recurring ? " · recurring" : ""}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">

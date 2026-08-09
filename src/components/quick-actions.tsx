@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeftRight, HandCoins, Minus, Plus, Receipt, Wallet } from "lucide-react";
+import { ArrowLeftRight, HandCoins, Minus, Plus, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Field, FormDialog } from "@/components/kit";
 import {
   addTransaction,
@@ -63,7 +62,6 @@ export function EntryDialog({
     account_id: existing?.account_id ?? "",
     description: existing?.description ?? "",
     notes: existing?.notes ?? "",
-    is_recurring: existing?.is_recurring ?? false,
   });
 
   const catList = (categories.data ?? []).filter((c) => c.kind === kind);
@@ -92,7 +90,7 @@ export function EntryDialog({
       account_id: form.account_id || null,
       description: form.description || null,
       notes: form.notes || null,
-      is_recurring: form.is_recurring,
+      is_recurring: false,
     });
     setOpen(false);
   };
@@ -206,15 +204,6 @@ export function EntryDialog({
           rows={2}
         />
       </Field>
-      {kind === "income" ? (
-        <label className="flex items-center justify-between rounded-xl border border-border px-3 py-2">
-          <span className="text-sm font-medium">Recurring income</span>
-          <Switch
-            checked={form.is_recurring}
-            onCheckedChange={(v) => setForm({ ...form, is_recurring: v })}
-          />
-        </label>
-      ) : null}
     </FormDialog>
   );
 }
@@ -660,113 +649,10 @@ export function DebtPaymentDialog({
   );
 }
 
-/** Transfer between accounts. */
-export function TransferDialog({ trigger }: { trigger?: React.ReactNode }) {
-  const accounts = useAccounts();
-  const save = useSaveRow("transactions", "Transfer recorded");
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    amount: "",
-    date: today(),
-    account_id: "",
-    to_account_id: "",
-    notes: "",
-  });
-
-  const submit = async () => {
-    if (!positive(form.amount)) {
-      toast.error("Enter an amount greater than zero.");
-      return;
-    }
-    if (!form.account_id || !form.to_account_id) {
-      toast.error("Choose both accounts.");
-      return;
-    }
-    if (form.account_id === form.to_account_id) {
-      toast.error("Pick two different accounts.");
-      return;
-    }
-    await save.mutateAsync({
-      type: "transfer",
-      amount: Number(form.amount),
-      date: form.date,
-      category: "Transfer",
-      account_id: form.account_id,
-      to_account_id: form.to_account_id,
-      notes: form.notes || null,
-      description: "Account transfer",
-    });
-    setOpen(false);
-    setForm({ amount: "", date: today(), account_id: "", to_account_id: "", notes: "" });
-  };
-
-  return (
-    <FormDialog
-      trigger={trigger}
-      open={open}
-      onOpenChange={setOpen}
-      title="Transfer money"
-      description="Move money between your own accounts."
-      onSubmit={submit}
-      submitting={save.isPending}
-    >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Amount">
-          <Input
-            type="number"
-            min="0.01"
-            step="0.01"
-            value={form.amount}
-            onChange={(e) => setForm({ ...form, amount: e.target.value })}
-            required
-          />
-        </Field>
-        <Field label="Date">
-          <Input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
-          />
-        </Field>
-        <Field label="From">
-          <Select value={form.account_id} onValueChange={(v) => setForm({ ...form, account_id: v })}>
-            <SelectTrigger>
-              <SelectValue placeholder="From account" />
-            </SelectTrigger>
-            <SelectContent>
-              {(accounts.data ?? []).map((a) => (
-                <SelectItem key={a.id} value={a.id}>
-                  {a.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="To">
-          <Select
-            value={form.to_account_id}
-            onValueChange={(v) => setForm({ ...form, to_account_id: v })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="To account" />
-            </SelectTrigger>
-            <SelectContent>
-              {(accounts.data ?? []).map((a) => (
-                <SelectItem key={a.id} value={a.id}>
-                  {a.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-      </div>
-    </FormDialog>
-  );
-}
 
 export function QuickActions() {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <EntryDialog
         kind="expense"
         trigger={
@@ -801,13 +687,6 @@ export function QuickActions() {
         trigger={
           <Button size="sm" variant="outline">
             <Receipt className="h-4 w-4" /> Payment
-          </Button>
-        }
-      />
-      <TransferDialog
-        trigger={
-          <Button size="sm" variant="outline">
-            <Wallet className="h-4 w-4" /> Transfer
           </Button>
         }
       />

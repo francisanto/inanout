@@ -30,9 +30,9 @@ import { DEBT_TYPES, dueLabel, formatMoney, pct, settlementStatus, toISO } from 
 export const Route = createFileRoute("/_authenticated/debts")({
   head: () => ({
     meta: [
-      { title: "Debts & borrowed — In&out" },
+      { title: "Debts — In&out" },
       { name: "description", content: "Loans, EMIs, credit cards and money you borrowed from people, in one place." },
-      { property: "og:title", content: "Debts & borrowed — In&out" },
+      { property: "og:title", content: "Debts — In&out" },
       { property: "og:description", content: "Everything you owe, with payments and due dates." },
     ],
   }),
@@ -151,7 +151,7 @@ function DebtsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Debts & borrowed" description="Everything you owe — banks and people." />
+      <PageHeader title="Debts" description="Everything you owe — banks and people." />
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Total owed" value={debtRemaining + borrowRemaining} currency={currency} tone="negative" />

@@ -55,9 +55,11 @@ function Dashboard() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="In&out" description={range.label} />
-
-      <RangeFilter state={state} onChange={setState} includeAll={false} />
+      <PageHeader
+        title="In&out"
+        description={range.label}
+        actions={<RangeFilter state={state} onChange={setState} includeAll={false} />}
+      />
 
       <QuickActions />
 
@@ -120,9 +122,6 @@ function Dashboard() {
         <div className="card-surface p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">Due soon</h2>
-            <Button asChild size="sm" variant="ghost">
-              <Link to="/recurring">Recurring</Link>
-            </Button>
           </div>
           {obligations.loading ? (
             <LoadingBlock rows={2} />

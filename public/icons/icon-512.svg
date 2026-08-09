@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="#6366f1"/>
+  <rect x="96" y="140" width="320" height="232" rx="42" fill="#ffffff" fill-opacity="0.95"/>
+  <rect x="96" y="192" width="320" height="52" fill="#6366f1"/>
+  <circle cx="336" cy="314" r="26" fill="#6366f1"/>
+  <text x="256" y="118" text-anchor="middle" font-family="system-ui,sans-serif" font-size="58" font-weight="700" fill="#ffffff">In&amp;out</text>
+</svg>

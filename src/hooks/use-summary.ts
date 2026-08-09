@@ -6,7 +6,6 @@ import {
   useDebts,
   useGoals,
   useLendings,
-  useRecurring,
   useTransactions,
 } from "@/hooks/use-data";
 import {
@@ -183,30 +182,16 @@ export interface Obligation {
   amount: number;
   date: string;
   days: number;
-  kind: "recurring" | "debt" | "borrowing" | "lending";
+  kind: "debt" | "borrowing" | "lending";
 }
 
 export function useUpcomingObligations(windowDays = 30) {
-  const recurring = useRecurring();
   const debts = useDebts();
   const borrowings = useBorrowings();
   const lendings = useLendings();
 
   const items = useMemo(() => {
     const out: Obligation[] = [];
-    for (const r of recurring.data ?? []) {
-      if (!r.active) continue;
-      const d = daysUntil(r.next_due_date);
-      if (d === null || d > windowDays) continue;
-      out.push({
-        id: r.id,
-        label: r.name,
-        amount: Number(r.amount),
-        date: r.next_due_date,
-        days: d,
-        kind: "recurring",
-      });
-    }
     for (const d of debts.data ?? []) {
       const days = daysUntil(d.due_date);
       const remaining = Number(d.total_amount) - Number(d.paid_amount);
@@ -247,10 +232,10 @@ export function useUpcomingObligations(windowDays = 30) {
       });
     }
     return out.sort((a, b) => a.days - b.days);
-  }, [recurring.data, debts.data, borrowings.data, lendings.data, windowDays]);
+  }, [debts.data, borrowings.data, lendings.data, windowDays]);
 
   return {
     items,
-    loading: recurring.isLoading || debts.isLoading || borrowings.isLoading || lendings.isLoading,
+    loading: debts.isLoading || borrowings.isLoading || lendings.isLoading,
   };
 }

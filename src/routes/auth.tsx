@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -107,7 +107,7 @@ function AuthPage() {
             Every rupee in, every rupee out — accounted for.
           </h1>
           <p className="mt-4 max-w-sm text-sm text-sidebar-foreground/70">
-            Budgets, borrowings, lending, EMIs, recurring bills and savings goals, calculated live
+            Budgets, borrowings, lending, EMIs and savings goals, calculated live
             from your own records.
           </p>
         </div>
@@ -212,11 +212,6 @@ function AuthPage() {
           <Button variant="outline" className="w-full" onClick={() => void google()}>
             Continue with Google
           </Button>
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            <Link to="/" className="hover:underline">
-              Back to home
-            </Link>
-          </p>
         </div>
       </div>
     </div>

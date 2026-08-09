@@ -19,7 +19,6 @@ import { Route as AuthenticatedExpensesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedIncomeRouteImport } from './routes/_authenticated/income'
 import { Route as AuthenticatedLendingRouteImport } from './routes/_authenticated/lending'
 import { Route as AuthenticatedPeopleRouteImport } from './routes/_authenticated/people'
-import { Route as AuthenticatedRecurringRouteImport } from './routes/_authenticated/recurring'
 import { Route as AuthenticatedSavingsRouteImport } from './routes/_authenticated/savings'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTransactionsRouteImport } from './routes/_authenticated/transactions'
@@ -73,11 +72,6 @@ const AuthenticatedPeopleRoute = AuthenticatedPeopleRouteImport.update({
   path: '/people',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedRecurringRoute = AuthenticatedRecurringRouteImport.update({
-  id: '/recurring',
-  path: '/recurring',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSavingsRoute = AuthenticatedSavingsRouteImport.update({
   id: '/savings',
   path: '/savings',
@@ -105,7 +99,6 @@ export interface FileRoutesByFullPath {
   '/income': typeof AuthenticatedIncomeRoute
   '/lending': typeof AuthenticatedLendingRoute
   '/people': typeof AuthenticatedPeopleRoute
-  '/recurring': typeof AuthenticatedRecurringRoute
   '/savings': typeof AuthenticatedSavingsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
@@ -120,7 +113,6 @@ export interface FileRoutesByTo {
   '/income': typeof AuthenticatedIncomeRoute
   '/lending': typeof AuthenticatedLendingRoute
   '/people': typeof AuthenticatedPeopleRoute
-  '/recurring': typeof AuthenticatedRecurringRoute
   '/savings': typeof AuthenticatedSavingsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/transactions': typeof AuthenticatedTransactionsRoute
@@ -137,7 +129,6 @@ export interface FileRoutesById {
   '/_authenticated/income': typeof AuthenticatedIncomeRoute
   '/_authenticated/lending': typeof AuthenticatedLendingRoute
   '/_authenticated/people': typeof AuthenticatedPeopleRoute
-  '/_authenticated/recurring': typeof AuthenticatedRecurringRoute
   '/_authenticated/savings': typeof AuthenticatedSavingsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/transactions': typeof AuthenticatedTransactionsRoute
@@ -154,7 +145,6 @@ export interface FileRouteTypes {
     | '/income'
     | '/lending'
     | '/people'
-    | '/recurring'
     | '/savings'
     | '/settings'
     | '/transactions'
@@ -169,7 +159,6 @@ export interface FileRouteTypes {
     | '/income'
     | '/lending'
     | '/people'
-    | '/recurring'
     | '/savings'
     | '/settings'
     | '/transactions'
@@ -185,7 +174,6 @@ export interface FileRouteTypes {
     | '/_authenticated/income'
     | '/_authenticated/lending'
     | '/_authenticated/people'
-    | '/_authenticated/recurring'
     | '/_authenticated/savings'
     | '/_authenticated/settings'
     | '/_authenticated/transactions'
@@ -270,13 +258,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPeopleRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/recurring': {
-      id: '/_authenticated/recurring'
-      path: '/recurring'
-      fullPath: '/recurring'
-      preLoaderRoute: typeof AuthenticatedRecurringRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/savings': {
       id: '/_authenticated/savings'
       path: '/savings'
@@ -308,7 +289,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIncomeRoute: typeof AuthenticatedIncomeRoute
   AuthenticatedLendingRoute: typeof AuthenticatedLendingRoute
   AuthenticatedPeopleRoute: typeof AuthenticatedPeopleRoute
-  AuthenticatedRecurringRoute: typeof AuthenticatedRecurringRoute
   AuthenticatedSavingsRoute: typeof AuthenticatedSavingsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTransactionsRoute: typeof AuthenticatedTransactionsRoute
@@ -321,7 +301,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIncomeRoute: AuthenticatedIncomeRoute,
   AuthenticatedLendingRoute: AuthenticatedLendingRoute,
   AuthenticatedPeopleRoute: AuthenticatedPeopleRoute,
-  AuthenticatedRecurringRoute: AuthenticatedRecurringRoute,
   AuthenticatedSavingsRoute: AuthenticatedSavingsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTransactionsRoute: AuthenticatedTransactionsRoute,
@@ -339,3 +318,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

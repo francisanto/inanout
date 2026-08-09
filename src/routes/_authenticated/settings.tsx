@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Plus, Trash2, Wallet } from "lucide-react";
+import { LogOut, Plus, Share, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,8 @@ import {
   useSaveRow,
 } from "@/hooks/use-data";
 import { ACCOUNT_TYPES, CURRENCIES, formatMoney } from "@/lib/finance";
+import { MOBILE_MORE_ITEMS } from "@/components/app-shell";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -51,11 +53,12 @@ const REMINDER_LABELS: Record<string, string> = {
   loan_payment: "Loan payment",
   borrowed_repayment: "Money I borrowed",
   lending_collection: "Money lent out",
-  recurring_bills: "Recurring bills",
   salary_date: "Salary credited",
   budget_warnings: "Spending warnings",
   savings_goals: "Savings goals",
 };
+
+const HIDDEN_REMINDERS = new Set(["recurring_bills"]);
 
 function ProfileCard() {
   const { data: profile, isLoading } = useProfile();
@@ -269,7 +272,7 @@ function AccountsCard() {
 function RemindersCard() {
   const reminders = useReminders();
   const save = useSaveRow("reminders", "Reminder updated");
-  const rows = reminders.data ?? [];
+  const rows = (reminders.data ?? []).filter((r) => !HIDDEN_REMINDERS.has(r.type));
 
   return (
     <section className="card-surface p-4 sm:p-5">
@@ -294,6 +297,91 @@ function RemindersCard() {
   );
 }
 
+function MobileNavCard() {
+  return (
+    <section className="card-surface p-4 sm:p-5 lg:hidden">
+      <h2 className="mb-1 text-base font-semibold">All pages</h2>
+      <p className="mb-4 text-sm text-muted-foreground">Quick links to every section of the app.</p>
+      <div className="grid grid-cols-2 gap-2">
+        {MOBILE_MORE_ITEMS.map((item) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm font-medium transition-colors hover:bg-muted/60"
+          >
+            <item.icon className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
+
+function InstallAppCard() {
+  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const onInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferred(e as BeforeInstallPromptEvent);
+    };
+    const onInstalled = () => {
+      setInstalled(true);
+      setDeferred(null);
+    };
+    window.addEventListener("beforeinstallprompt", onInstall);
+    window.addEventListener("appinstalled", onInstalled);
+    if (window.matchMedia("(display-mode: standalone)").matches) setInstalled(true);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onInstall);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  const install = async () => {
+    if (!deferred) return;
+    await deferred.prompt();
+    const { outcome } = await deferred.userChoice;
+    if (outcome === "accepted") toast.success("In&out added to your home screen");
+    setDeferred(null);
+  };
+
+  return (
+    <section className="card-surface p-4 sm:p-5">
+      <div className="flex items-start gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+          <Share className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base font-semibold">Add to home screen</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {installed
+              ? "You're using In&out like an app. Open it from your home screen anytime."
+              : "Install In&out on your phone for quick access — works offline after the first load."}
+          </p>
+          {!installed && deferred ? (
+            <Button className="mt-3" size="sm" onClick={() => void install()}>
+              Install app
+            </Button>
+          ) : null}
+          {!installed && !deferred ? (
+            <p className={cn("mt-3 text-xs text-muted-foreground")}>
+              On iPhone: tap Share in Safari, then “Add to Home Screen”. On Android: use the browser menu or the Install button when it appears.
+            </p>
+          ) : null}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SettingsPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -308,6 +396,8 @@ function SettingsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Settings" description="Profile, accounts and reminders." />
+      <MobileNavCard />
+      <InstallAppCard />
       <ProfileCard />
       <AccountsCard />
       <RemindersCard />

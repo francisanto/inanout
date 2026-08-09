@@ -24,6 +24,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { formatMoney, resolveRange, type Granularity, type RangeKey } from "@/lib/finance";
@@ -204,25 +211,34 @@ export function RangeFilter({
     ...(includeAll ? [{ value: "all" as RangeKey, label: "All" }] : []),
     { value: "custom", label: "Custom" },
   ];
+  const currentLabel = options.find((o) => o.value === state.key)?.label ?? "Period";
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Segmented
-        value={state.key}
-        onChange={(key) => onChange({ ...state, key })}
-        options={options}
-      />
+      <Select value={state.key} onValueChange={(key) => onChange({ ...state, key: key as RangeKey })}>
+        <SelectTrigger className="h-9 w-[9.5rem] text-xs font-semibold">
+          <SelectValue placeholder={currentLabel}>{currentLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       {state.key === "custom" ? (
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <Input
             type="date"
-            className="h-9 w-[9.5rem]"
+            className="h-9 min-w-0 flex-1 sm:w-[9.5rem] sm:flex-none"
             value={state.from ?? ""}
             onChange={(e) => onChange({ ...state, from: e.target.value })}
           />
           <span className="text-xs text-muted-foreground">to</span>
           <Input
             type="date"
-            className="h-9 w-[9.5rem]"
+            className="h-9 min-w-0 flex-1 sm:w-[9.5rem] sm:flex-none"
             value={state.to ?? ""}
             onChange={(e) => onChange({ ...state, to: e.target.value })}
           />
