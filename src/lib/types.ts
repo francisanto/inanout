@@ -4,6 +4,9 @@ export interface Profile {
   email: string | null;
   currency: string;
   monthly_savings_target: number;
+  salary_amount?: number;
+  salary_day?: number | null;
+  salary_last_posted?: string | null;
 }
 
 export interface Account {

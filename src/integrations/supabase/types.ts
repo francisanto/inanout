@@ -325,6 +325,9 @@ export type Database = {
           full_name: string | null
           id: string
           monthly_savings_target: number
+          salary_amount: number
+          salary_day: number | null
+          salary_last_posted: string | null
           updated_at: string
         }
         Insert: {
@@ -334,6 +337,9 @@ export type Database = {
           full_name?: string | null
           id: string
           monthly_savings_target?: number
+          salary_amount?: number
+          salary_day?: number | null
+          salary_last_posted?: string | null
           updated_at?: string
         }
         Update: {
@@ -343,6 +349,9 @@ export type Database = {
           full_name?: string | null
           id?: string
           monthly_savings_target?: number
+          salary_amount?: number
+          salary_day?: number | null
+          salary_last_posted?: string | null
           updated_at?: string
         }
         Relationships: []
