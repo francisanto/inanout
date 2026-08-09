@@ -1,17 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
-  BarChart3,
-  CalendarClock,
   CreditCard,
-  HandCoins,
   LayoutDashboard,
   ListOrdered,
   LogOut,
   PiggyBank,
   Repeat,
   Settings,
-  Target,
   TrendingDown,
   TrendingUp,
   Users,
@@ -23,22 +19,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSalaryAutoPost } from "@/hooks/use-salary";
 
 export const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/expenses", label: "Expenses", icon: TrendingDown },
   { to: "/income", label: "Income", icon: TrendingUp },
-  { to: "/borrowings", label: "Borrowings", icon: HandCoins },
+  { to: "/debts", label: "Debts & borrowed", icon: CreditCard },
   { to: "/lending", label: "Lending", icon: ArrowLeftRight },
-  { to: "/debts", label: "Debts", icon: CreditCard },
-  { to: "/budgets", label: "Budgets", icon: Target },
-  { to: "/daily-plan", label: "Daily plan", icon: CalendarClock },
   { to: "/recurring", label: "Recurring", icon: Repeat },
   { to: "/savings", label: "Savings", icon: PiggyBank },
-  { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/transactions", label: "Transactions", icon: ListOrdered },
   { to: "/people", label: "People", icon: Users },
-  { to: "/accounts", label: "Accounts", icon: Wallet },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -46,7 +38,7 @@ const MOBILE_ITEMS = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/expenses", label: "Expenses", icon: TrendingDown },
   { to: "/transactions", label: "Activity", icon: ListOrdered },
-  { to: "/budgets", label: "Budgets", icon: Target },
+  { to: "/debts", label: "Debts", icon: CreditCard },
   { to: "/settings", label: "More", icon: Settings },
 ] as const;
 
