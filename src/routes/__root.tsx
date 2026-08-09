@@ -79,19 +79,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "In&out — Personal Finance Manager" },
+      { title: "In&out" },
       {
         name: "description",
         content:
           "Track income, expenses, budgets, borrowings, lending, debts and savings goals in one private dashboard.",
       },
-      { property: "og:title", content: "In&out — Personal Finance Manager" },
+      { property: "og:title", content: "In&out" },
       {
         property: "og:description",
-        content: "One place for your money in and money out: budgets, debts, lending and savings.",
+        content: "Track income, expenses, budgets, borrowings, lending, debts and savings goals in one private dashboard.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "In&out" },
+      { name: "twitter:description", content: "Track income, expenses, budgets, borrowings, lending, debts and savings goals in one private dashboard." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0c7c56be059184f42fc0d521b4f5e43/id-preview-bed09a00--b8944707-f0c6-415f-bae4-e81f114f24f8.lovable.app-1786249598904.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c0c7c56be059184f42fc0d521b4f5e43/id-preview-bed09a00--b8944707-f0c6-415f-bae4-e81f114f24f8.lovable.app-1786249598904.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -101,7 +105,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
