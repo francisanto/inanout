@@ -64,6 +64,7 @@ function useSignOut() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const signOut = useSignOut();
+  useSalaryAutoPost();
 
   return (
     <div className="min-h-screen w-full bg-background">
