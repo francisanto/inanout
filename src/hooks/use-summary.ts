@@ -239,3 +239,45 @@ export function useUpcomingObligations(windowDays = 30) {
     loading: debts.isLoading || borrowings.isLoading || lendings.isLoading,
   };
 }
+
+/** Live balance per account: opening balance adjusted by every transaction touching it. */
+export function useAccountBalances() {
+  const accounts = useAccounts();
+  const tx = useTransactions();
+
+  return useMemo(() => {
+    const map = new Map<string, number>();
+    for (const a of accounts.data ?? []) map.set(a.id, Number(a.opening_balance || 0));
+
+    const bump = (id: string | null, delta: number) => {
+      if (!id || !map.has(id)) return;
+      map.set(id, (map.get(id) ?? 0) + delta);
+    };
+
+    for (const t of tx.data ?? []) {
+      const amount = Number(t.amount || 0);
+      switch (t.type) {
+        case "income":
+        case "borrowed":
+          bump(t.account_id, amount);
+          break;
+        case "expense":
+        case "lending":
+        case "debt_payment":
+          bump(t.account_id, -amount);
+          break;
+        case "repayment":
+          if (t.borrowing_id || t.category === "Borrowing repaid") bump(t.account_id, -amount);
+          else bump(t.account_id, amount);
+          break;
+        case "transfer":
+          bump(t.account_id, -amount);
+          bump(t.to_account_id, amount);
+          break;
+        default:
+          break;
+      }
+    }
+    return map;
+  }, [accounts.data, tx.data]);
+}
