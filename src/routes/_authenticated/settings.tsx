@@ -32,6 +32,7 @@ import {
   useReminders,
   useSaveRow,
 } from "@/hooks/use-data";
+import { useAccountBalances } from "@/hooks/use-summary";
 import { ACCOUNT_TYPES, CURRENCIES, formatMoney } from "@/lib/finance";
 import { cn } from "@/lib/utils";
 
@@ -226,6 +227,7 @@ function AccountForm() {
 function AccountsCard() {
   const currency = useCurrency();
   const accounts = useAccounts();
+  const balances = useAccountBalances();
   const del = useDeleteRow("accounts", "Account deleted");
   const rows = accounts.data ?? [];
 
@@ -245,11 +247,13 @@ function AccountsCard() {
             <li key={a.id} className="flex items-center justify-between gap-3 py-2.5">
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{a.name}</p>
-                <p className="text-xs capitalize text-muted-foreground">{a.type.replace("_", " ")}</p>
+                <p className="text-xs capitalize text-muted-foreground">
+                  {a.type.replace("_", " ")} · opening {formatMoney(Number(a.opening_balance), currency)}
+                </p>
               </div>
               <div className="flex shrink-0 items-center gap-1">
-                <span className="text-sm tabular-nums text-muted-foreground">
-                  {formatMoney(Number(a.opening_balance), currency)}
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatMoney(balances.get(a.id) ?? Number(a.opening_balance), currency)}
                 </span>
                 <ConfirmDelete
                   onConfirm={() => del.mutate(a.id)}
