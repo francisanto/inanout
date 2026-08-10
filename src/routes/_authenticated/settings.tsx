@@ -297,26 +297,6 @@ function RemindersCard() {
   );
 }
 
-function MobileNavCard() {
-  return (
-    <section className="card-surface p-4 sm:p-5 lg:hidden">
-      <h2 className="mb-1 text-base font-semibold">All pages</h2>
-      <p className="mb-4 text-sm text-muted-foreground">Quick links to every section of the app.</p>
-      <div className="grid grid-cols-2 gap-2">
-        {MOBILE_MORE_ITEMS.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className="flex items-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-3 text-sm font-medium transition-colors hover:bg-muted/60"
-          >
-            <item.icon className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">{item.label}</span>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
