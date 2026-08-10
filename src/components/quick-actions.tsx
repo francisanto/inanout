@@ -635,14 +635,39 @@ export function DebtPaymentDialog({
       submitLabel="Record payment"
     >
       <Field label="Debt">
-        <Select value={form.debt_id} onValueChange={(v) => setForm({ ...form, debt_id: v })}>
+        {openDebts.length === 0 ? (
+          <p className="rounded-md border border-dashed border-border px-3 py-2.5 text-sm text-muted-foreground">
+            No open debts yet. Add a loan, EMI or credit card on the Debts page first.
+          </p>
+        ) : (
+          <Select value={form.debt_id} onValueChange={(v) => setForm({ ...form, debt_id: v })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choose a debt" />
+            </SelectTrigger>
+            <SelectContent>
+              {openDebts.map((d) => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.name} · left{" "}
+                  {Math.max(Number(d.total_amount) - Number(d.paid_amount), 0).toLocaleString("en-IN")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </Field>
+      <Field label="Pay from account">
+        <Select
+          value={form.account_id || "none"}
+          onValueChange={(v) => setForm({ ...form, account_id: v === "none" ? "" : v })}
+        >
           <SelectTrigger>
-            <SelectValue placeholder="Choose a debt" />
+            <SelectValue placeholder="Optional" />
           </SelectTrigger>
           <SelectContent>
-            {(debts.data ?? []).map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {d.name}
+            <SelectItem value="none">Not linked</SelectItem>
+            {(accounts.data ?? []).map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.name}
               </SelectItem>
             ))}
           </SelectContent>
