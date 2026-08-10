@@ -32,6 +32,7 @@ import {
   useReminders,
   useSaveRow,
 } from "@/hooks/use-data";
+import { useAccountBalances } from "@/hooks/use-summary";
 import { ACCOUNT_TYPES, CURRENCIES, formatMoney } from "@/lib/finance";
 import { cn } from "@/lib/utils";
 
