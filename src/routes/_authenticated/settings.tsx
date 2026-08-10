@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { LogOut, Plus, Share, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,6 @@ import {
   useSaveRow,
 } from "@/hooks/use-data";
 import { ACCOUNT_TYPES, CURRENCIES, formatMoney } from "@/lib/finance";
-import { MOBILE_MORE_ITEMS } from "@/components/app-shell";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/settings")({
@@ -376,7 +375,6 @@ function SettingsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Settings" description="Profile, accounts and reminders." />
-      <MobileNavCard />
       <InstallAppCard />
       <ProfileCard />
       <AccountsCard />
