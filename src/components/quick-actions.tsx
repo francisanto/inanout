@@ -611,6 +611,7 @@ export function DebtPaymentDialog({
         date: form.date,
         category: "Debt payment",
         description: `Payment for ${debt.name}`,
+        account_id: form.account_id || null,
         debt_id: form.debt_id,
       });
       invalidate();
