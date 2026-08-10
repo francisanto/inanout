@@ -32,17 +32,6 @@ export const Route = createFileRoute("/_authenticated/transactions")({
   component: TransactionsPage,
 });
 
-type Filter = "all" | "expense" | "income" | "borrowed" | "lending" | "repayment" | "debt_payment";
-
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "expense", label: "Out" },
-  { value: "income", label: "In" },
-  { value: "borrowed", label: "Borrowed" },
-  { value: "lending", label: "Lent" },
-  { value: "repayment", label: "Repaid" },
-  { value: "debt_payment", label: "Debt" },
-];
 
 function TransactionsPage() {
   const currency = useCurrency();
