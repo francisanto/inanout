@@ -41,7 +41,7 @@ export const TX_TYPE_LABELS: Record<string, string> = {
 };
 
 export const ACCOUNT_TYPES = ["cash", "bank", "upi", "credit_card", "wallet", "other"] as const;
-export const PAYMENT_METHODS = ["Cash", "UPI", "Debit card", "Credit card", "Net banking", "Wallet", "Other"];
+export const PAYMENT_METHODS = ["Cash", "UPI", "Credit card", "Debit card", "Other"];
 export const DEBT_TYPES = ["credit_card", "loan", "emi", "bnpl", "other"] as const;
 export const FREQUENCIES = ["daily", "weekly", "monthly", "yearly"] as const;
 
