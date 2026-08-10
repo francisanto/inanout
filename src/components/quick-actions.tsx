@@ -281,7 +281,10 @@ export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setForm({ person_name: "", amount: "", date: today(), due_date: "", notes: "" });
+      }}
       title="Borrowed money"
       description="Money you took from someone and need to repay."
       onSubmit={submit}
@@ -393,7 +396,11 @@ export function LendDialog({ trigger }: { trigger?: React.ReactNode }) {
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next)
+          setForm({ person_name: "", amount: "", date: today(), expected_return_date: "", notes: "" });
+      }}
       title="Lent money"
       description="Money you gave someone and expect back."
       onSubmit={submit}
