@@ -558,10 +558,15 @@ export function DebtPaymentDialog({
   debtId?: string;
 }) {
   const debts = useDebts();
+  const accounts = useAccounts();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const invalidate = useInvalidateAll();
-  const [form, setForm] = useState({ debt_id: debtId ?? "", amount: "", date: today(), notes: "" });
+  const blank = () => ({ debt_id: debtId ?? "", amount: "", date: today(), account_id: "", notes: "" });
+  const [form, setForm] = useState(blank);
+  const openDebts = (debts.data ?? []).filter(
+    (d) => d.id === form.debt_id || Number(d.total_amount) - Number(d.paid_amount) > 0,
+  );
 
   const submit = async () => {
     if (!form.debt_id) {
