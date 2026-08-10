@@ -616,7 +616,7 @@ export function DebtPaymentDialog({
       invalidate();
       toast.success("Payment recorded");
       setOpen(false);
-      setForm({ debt_id: debtId ?? "", amount: "", date: today(), notes: "" });
+      setForm(blank());
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -630,7 +630,7 @@ export function DebtPaymentDialog({
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (!next) setForm({ debt_id: debtId ?? "", amount: "", date: today(), notes: "" });
+        if (!next) setForm(blank());
       }}
 
       title="Record payment"
