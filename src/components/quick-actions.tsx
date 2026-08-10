@@ -517,7 +517,13 @@ export function SettleDialog({
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) {
+          setAmount("");
+          setDate(today());
+        }
+      }}
       title={kind === "borrowing" ? `Repay ${personName}` : `Collect from ${personName}`}
       description={`Remaining: ${remaining.toFixed(2)}`}
       onSubmit={submit}
