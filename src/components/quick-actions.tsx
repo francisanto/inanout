@@ -623,7 +623,11 @@ export function DebtPaymentDialog({
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setForm({ debt_id: debtId ?? "", amount: "", date: today(), notes: "" });
+      }}
+
       title="Record payment"
       description="Pay an EMI, credit card bill or loan instalment."
       onSubmit={submit}
