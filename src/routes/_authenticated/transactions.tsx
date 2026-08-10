@@ -10,7 +10,6 @@ import {
   LoadingBlock,
   PageHeader,
   RangeFilter,
-  Segmented,
   StatCard,
   useRangeState,
 } from "@/components/kit";
@@ -32,24 +31,12 @@ export const Route = createFileRoute("/_authenticated/transactions")({
   component: TransactionsPage,
 });
 
-type Filter = "all" | "expense" | "income" | "borrowed" | "lending" | "repayment" | "debt_payment";
-
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "expense", label: "Out" },
-  { value: "income", label: "In" },
-  { value: "borrowed", label: "Borrowed" },
-  { value: "lending", label: "Lent" },
-  { value: "repayment", label: "Repaid" },
-  { value: "debt_payment", label: "Debt" },
-];
 
 function TransactionsPage() {
   const currency = useCurrency();
   const tx = useTransactions();
   const del = useDeleteRow("transactions", "Transaction deleted");
   const { state, setState, range } = useRangeState("month");
-  const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Transaction | null>(null);
 
@@ -57,13 +44,12 @@ function TransactionsPage() {
     const term = q.trim().toLowerCase();
     return (tx.data ?? []).filter((t) => {
       if (!inRange(t.date, range)) return false;
-      if (filter !== "all" && t.type !== filter) return false;
       if (!term) return true;
       return [t.description, t.category, t.notes, t.source, t.payment_method]
         .filter(Boolean)
         .some((v) => String(v).toLowerCase().includes(term));
     });
-  }, [tx.data, range, filter, q]);
+  }, [tx.data, range, q]);
 
   const inflow = rows
     .filter((t) => t.type === "income" || t.type === "borrowed")
@@ -78,7 +64,6 @@ function TransactionsPage() {
 
       <div className="space-y-3">
         <RangeFilter state={state} onChange={setState} />
-        <Segmented value={filter} onChange={setFilter} options={FILTERS} />
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input

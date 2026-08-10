@@ -51,9 +51,8 @@ export function EntryDialog({
   const save = useSaveRow("transactions", kind === "expense" ? "Expense saved" : "Income saved");
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ?? internalOpen;
-  const setOpen = onOpenChange ?? setInternalOpen;
 
-  const [form, setForm] = useState({
+  const blank = () => ({
     amount: existing ? String(existing.amount) : "",
     category: existing?.category ?? "",
     source: existing?.source ?? (kind === "income" ? "Salary" : ""),
@@ -64,7 +63,16 @@ export function EntryDialog({
     notes: existing?.notes ?? "",
   });
 
+  const [form, setForm] = useState(blank);
+
+  const setOpen = (next: boolean) => {
+    if (!next) setForm(blank());
+    if (onOpenChange) onOpenChange(next);
+    else setInternalOpen(next);
+  };
+
   const catList = (categories.data ?? []).filter((c) => c.kind === kind);
+
 
   const submit = async () => {
     if (!positive(form.amount)) {
@@ -273,7 +281,10 @@ export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setForm({ person_name: "", amount: "", date: today(), due_date: "", notes: "" });
+      }}
       title="Borrowed money"
       description="Money you took from someone and need to repay."
       onSubmit={submit}
@@ -385,7 +396,11 @@ export function LendDialog({ trigger }: { trigger?: React.ReactNode }) {
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next)
+          setForm({ person_name: "", amount: "", date: today(), expected_return_date: "", notes: "" });
+      }}
       title="Lent money"
       description="Money you gave someone and expect back."
       onSubmit={submit}
@@ -502,7 +517,13 @@ export function SettleDialog({
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) {
+          setAmount("");
+          setDate(today());
+        }
+      }}
       title={kind === "borrowing" ? `Repay ${personName}` : `Collect from ${personName}`}
       description={`Remaining: ${remaining.toFixed(2)}`}
       onSubmit={submit}
@@ -602,7 +623,11 @@ export function DebtPaymentDialog({
     <FormDialog
       trigger={trigger}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) setForm({ debt_id: debtId ?? "", amount: "", date: today(), notes: "" });
+      }}
+
       title="Record payment"
       description="Pay an EMI, credit card bill or loan instalment."
       onSubmit={submit}
