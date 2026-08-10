@@ -51,9 +51,8 @@ export function EntryDialog({
   const save = useSaveRow("transactions", kind === "expense" ? "Expense saved" : "Income saved");
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ?? internalOpen;
-  const setOpen = onOpenChange ?? setInternalOpen;
 
-  const [form, setForm] = useState({
+  const blank = () => ({
     amount: existing ? String(existing.amount) : "",
     category: existing?.category ?? "",
     source: existing?.source ?? (kind === "income" ? "Salary" : ""),
@@ -64,7 +63,16 @@ export function EntryDialog({
     notes: existing?.notes ?? "",
   });
 
+  const [form, setForm] = useState(blank);
+
+  const setOpen = (next: boolean) => {
+    if (!next) setForm(blank());
+    if (onOpenChange) onOpenChange(next);
+    else setInternalOpen(next);
+  };
+
   const catList = (categories.data ?? []).filter((c) => c.kind === kind);
+
 
   const submit = async () => {
     if (!positive(form.amount)) {
