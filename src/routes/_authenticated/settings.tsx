@@ -227,6 +227,7 @@ function AccountForm() {
 function AccountsCard() {
   const currency = useCurrency();
   const accounts = useAccounts();
+  const balances = useAccountBalances();
   const del = useDeleteRow("accounts", "Account deleted");
   const rows = accounts.data ?? [];
 
