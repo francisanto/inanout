@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   CalendarClock,
   Scale,
   TrendingDown,
@@ -27,9 +25,12 @@ import {
   useRangeState,
 } from "@/components/kit";
 import { QuickActions } from "@/components/quick-actions";
+import { DailyPlanCard } from "@/components/daily-plan";
+import { TxRow } from "@/components/tx-list";
 import { useCurrency } from "@/hooks/use-data";
 import { useFinanceSummary, useSeries, useUpcomingObligations } from "@/hooks/use-summary";
-import { TX_TYPE_LABELS, dueLabel, formatMoney, format, parseDate } from "@/lib/finance";
+import { dueLabel, formatMoney } from "@/lib/finance";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
