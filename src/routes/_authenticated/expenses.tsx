@@ -145,7 +145,52 @@ function ExpensesPage() {
         )}
       </section>
 
-      {categories.isLoading ? null : null}
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Expenses</h2>
+        {tx.isLoading ? (
+          <LoadingBlock rows={3} />
+        ) : scoped.length === 0 ? (
+          <EmptyState title="No expenses in this period" description="Add one with the button above." icon={TrendingDown} />
+        ) : (
+          <ul className="card-surface divide-y divide-border">
+            {scoped.map((t) => (
+              <TxRow
+                key={t.id}
+                tx={t}
+                currency={currency}
+                actions={
+                  <>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditing(t)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <ConfirmDelete
+                      onConfirm={() => del.mutate(t.id)}
+                      trigger={
+                        <Button size="icon" variant="ghost" className="h-8 w-8">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      }
+                    />
+                  </>
+                }
+              />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {editing ? (
+        <EntryDialog
+          key={editing.id}
+          kind="expense"
+          existing={editing}
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditing(null);
+          }}
+        />
+      ) : null}
+
     </div>
   );
 }
