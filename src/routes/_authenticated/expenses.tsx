@@ -82,28 +82,12 @@ function ExpensesPage() {
         description={`${range.label} · ${formatMoney(total, currency)} spent`}
         actions={
           <>
-            <FormDialog
-              open={catOpen}
-              onOpenChange={setCatOpen}
-              trigger={<Button size="sm" variant="outline">New category</Button>}
-              title="Add expense category"
-              submitLabel="Add category"
-              submitting={saveCategory.isPending}
-              onSubmit={async () => {
-                if (!newCategory.trim()) return;
-                await saveCategory.mutateAsync({ name: newCategory.trim(), kind: "expense" });
-                setNewCategory("");
-                setCatOpen(false);
-              }}
-            >
-              <Field label="Category name">
-                <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} required />
-              </Field>
-            </FormDialog>
+            <CategoryManager kind="expense" />
             <EntryDialog kind="expense" trigger={<Button size="sm"><Minus className="h-4 w-4" /> Add</Button>} />
           </>
         }
       />
+
 
       <RangeFilter state={state} onChange={setState} />
 
