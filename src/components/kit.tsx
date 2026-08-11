@@ -279,6 +279,7 @@ export function FormDialog({
   onSubmit,
   submitting,
   submitLabel = "Save",
+  compact,
   children,
 }: {
   trigger?: ReactNode;
@@ -289,18 +290,26 @@ export function FormDialog({
   onSubmit: () => void | Promise<void>;
   submitting?: boolean;
   submitLabel?: string;
+  compact?: boolean;
   children: ReactNode;
 }) {
   return (
     <Dialog {...(open === undefined ? {} : { open })} {...(onOpenChange ? { onOpenChange } : {})}>
       {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
-      <DialogContent className="max-h-[85dvh] overflow-y-auto overscroll-contain pb-[max(1rem,env(safe-area-inset-bottom))] sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description ? <DialogDescription>{description}</DialogDescription> : null}
+      <DialogContent
+        className={cn(
+          "max-h-[85dvh] overflow-y-auto overscroll-contain pb-[max(1rem,env(safe-area-inset-bottom))] sm:max-w-lg",
+          compact && "gap-3 rounded-2xl p-4 sm:p-6",
+        )}
+      >
+        <DialogHeader className={cn(compact && "space-y-1")}>
+          <DialogTitle className={cn(compact && "text-base")}>{title}</DialogTitle>
+          {description ? (
+            <DialogDescription className={cn(compact && "text-xs")}>{description}</DialogDescription>
+          ) : null}
         </DialogHeader>
         <form
-          className="space-y-4"
+          className={cn(compact ? "space-y-3" : "space-y-4")}
           onSubmit={(e) => {
             e.preventDefault();
             void onSubmit();
@@ -308,7 +317,7 @@ export function FormDialog({
         >
           {children}
           <DialogFooter>
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting} className={compact ? "w-full sm:w-auto" : undefined}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {submitLabel}
             </Button>
@@ -318,6 +327,7 @@ export function FormDialog({
     </Dialog>
   );
 }
+
 
 export function ConfirmDelete({
   onConfirm,

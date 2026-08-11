@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ListOrdered, Pencil, Search, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,11 +12,12 @@ import {
   StatCard,
   useRangeState,
 } from "@/components/kit";
+import { TxRow } from "@/components/tx-list";
 import { EntryDialog } from "@/components/quick-actions";
 import { useCurrency, useDeleteRow, useTransactions } from "@/hooks/use-data";
 import { inRange } from "@/hooks/use-summary";
-import { TX_TYPE_LABELS, format, formatMoney, parseDate } from "@/lib/finance";
 import type { Transaction } from "@/lib/types";
+
 
 export const Route = createFileRoute("/_authenticated/transactions")({
   head: () => ({
