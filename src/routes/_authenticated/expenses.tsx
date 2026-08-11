@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Minus, TrendingDown } from "lucide-react";
+import { Minus, Pencil, Trash2, TrendingDown } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,18 +11,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  ConfirmDelete,
   EmptyState,
-  Field,
-  FormDialog,
   LoadingBlock,
   PageHeader,
   RangeFilter,
   useRangeState,
 } from "@/components/kit";
+import { CategoryManager } from "@/components/category-manager";
+import { TxRow } from "@/components/tx-list";
 import { EntryDialog } from "@/components/quick-actions";
-import { useCategories, useCurrency, useSaveRow, useTransactions } from "@/hooks/use-data";
+import { useCurrency, useDeleteRow, useTransactions } from "@/hooks/use-data";
 import { inRange, useCategoryBreakdown, useSeries } from "@/hooks/use-summary";
 import { format, formatMoney, parseDate } from "@/lib/finance";
+import type { Transaction } from "@/lib/types";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
   head: () => ({
@@ -44,10 +45,8 @@ function ExpensesPage() {
   const { state, setState, range } = useRangeState("month");
   const [topView, setTopView] = useState<TopSpendView>("categories");
   const tx = useTransactions();
-  const categories = useCategories();
-  const saveCategory = useSaveRow("categories", "Category added");
-  const [newCategory, setNewCategory] = useState("");
-  const [catOpen, setCatOpen] = useState(false);
+  const del = useDeleteRow("transactions", "Expense deleted");
+  const [editing, setEditing] = useState<Transaction | null>(null);
 
   const scoped = useMemo(
     () => (tx.data ?? []).filter((t) => t.type === "expense" && inRange(t.date, range)),
@@ -55,6 +54,7 @@ function ExpensesPage() {
   );
   const series = useSeries(scoped, "daily");
   const byCategory = useCategoryBreakdown(scoped, "expense");
+
 
   const total = scoped.reduce((t, r) => t + Number(r.amount), 0);
 
