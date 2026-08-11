@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   CalendarClock,
   Scale,
   TrendingDown,
@@ -27,9 +25,12 @@ import {
   useRangeState,
 } from "@/components/kit";
 import { QuickActions } from "@/components/quick-actions";
+import { DailyPlanCard } from "@/components/daily-plan";
+import { TxRow } from "@/components/tx-list";
 import { useCurrency } from "@/hooks/use-data";
 import { useFinanceSummary, useSeries, useUpcomingObligations } from "@/hooks/use-summary";
-import { TX_TYPE_LABELS, dueLabel, formatMoney, format, parseDate } from "@/lib/finance";
+import { dueLabel, formatMoney } from "@/lib/finance";
+
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -118,6 +119,10 @@ function Dashboard() {
         )}
       </section>
 
+      <DailyPlanCard currency={currency} />
+
+
+
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="card-surface p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -145,7 +150,7 @@ function Dashboard() {
         </div>
 
         <div className="card-surface p-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mb-1 flex items-center justify-between gap-3">
             <h2 className="text-base font-semibold">Recent</h2>
             <Button asChild size="sm" variant="ghost">
               <Link to="/transactions">View all</Link>
@@ -156,30 +161,9 @@ function Dashboard() {
           ) : recent.length === 0 ? (
             <EmptyState title="No transactions yet" description="Use the buttons above to add your first record." icon={Wallet} />
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="-mx-3 divide-y divide-border sm:-mx-4">
               {recent.map((t) => (
-                <li key={t.id} className="flex items-center justify-between gap-3 py-2.5">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {t.description || t.category || TX_TYPE_LABELS[t.type]}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(parseDate(t.date), "dd MMM yyyy")} · {TX_TYPE_LABELS[t.type]}
-                    </p>
-                  </div>
-                  <span
-                    className={`shrink-0 text-sm font-semibold tabular-nums ${
-                      t.type === "income" || t.type === "borrowed" ? "text-success" : "text-foreground"
-                    }`}
-                  >
-                    {t.type === "income" || t.type === "borrowed" ? (
-                      <ArrowUpRight className="mr-1 inline h-3.5 w-3.5" />
-                    ) : (
-                      <ArrowDownRight className="mr-1 inline h-3.5 w-3.5" />
-                    )}
-                    {formatMoney(Number(t.amount), currency)}
-                  </span>
-                </li>
+                <TxRow key={t.id} tx={t} currency={currency} />
               ))}
             </ul>
           )}
@@ -188,3 +172,4 @@ function Dashboard() {
     </div>
   );
 }
+

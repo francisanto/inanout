@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ListOrdered, Pencil, Search, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,11 +12,12 @@ import {
   StatCard,
   useRangeState,
 } from "@/components/kit";
+import { TxRow } from "@/components/tx-list";
 import { EntryDialog } from "@/components/quick-actions";
 import { useCurrency, useDeleteRow, useTransactions } from "@/hooks/use-data";
 import { inRange } from "@/hooks/use-summary";
-import { TX_TYPE_LABELS, format, formatMoney, parseDate } from "@/lib/finance";
 import type { Transaction } from "@/lib/types";
+
 
 export const Route = createFileRoute("/_authenticated/transactions")({
   head: () => ({
@@ -88,44 +88,31 @@ function TransactionsPage() {
       ) : (
         <ul className="card-surface divide-y divide-border">
           {rows.map((t) => (
-            <li key={t.id} className="flex items-center justify-between gap-3 p-3.5">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">
-                  {t.description || t.category || TX_TYPE_LABELS[t.type]}
-                </p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                  <span>{format(parseDate(t.date), "dd MMM yyyy")}</span>
-                  <Badge variant="outline" className="text-[10px]">
-                    {TX_TYPE_LABELS[t.type]}
-                  </Badge>
-                  {t.category ? <span className="truncate">{t.category}</span> : null}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-1">
-                <span
-                  className={`text-sm font-semibold tabular-nums ${
-                    t.type === "income" || t.type === "borrowed" ? "text-success" : "text-foreground"
-                  }`}
-                >
-                  {formatMoney(Number(t.amount), currency)}
-                </span>
-                {t.type === "expense" || t.type === "income" ? (
-                  <Button size="icon" variant="ghost" onClick={() => setEditing(t)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                ) : null}
-                <ConfirmDelete
-                  onConfirm={() => del.mutate(t.id)}
-                  trigger={
-                    <Button size="icon" variant="ghost">
-                      <Trash2 className="h-3.5 w-3.5" />
+            <TxRow
+              key={t.id}
+              tx={t}
+              currency={currency}
+              actions={
+                <>
+                  {t.type === "expense" || t.type === "income" ? (
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditing(t)}>
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                  }
-                />
-              </div>
-            </li>
+                  ) : null}
+                  <ConfirmDelete
+                    onConfirm={() => del.mutate(t.id)}
+                    trigger={
+                      <Button size="icon" variant="ghost" className="h-8 w-8">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    }
+                  />
+                </>
+              }
+            />
           ))}
         </ul>
+
       )}
 
       {editing ? (

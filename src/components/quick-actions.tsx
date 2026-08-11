@@ -64,6 +64,8 @@ export function EntryDialog({
   });
 
   const [form, setForm] = useState(blank);
+  const [showNotes, setShowNotes] = useState(false);
+
 
   const setOpen = (next: boolean) => {
     if (!next) setForm(blank());
@@ -108,16 +110,16 @@ export function EntryDialog({
       trigger={trigger}
       open={isOpen}
       onOpenChange={setOpen}
+      compact
       title={`${existing ? "Edit" : "Add"} ${kind}`}
-      description={
-        kind === "expense" ? "Record money going out." : "Record salary, freelance or other income."
-      }
       onSubmit={submit}
       submitting={save.isPending}
+      submitLabel={existing ? "Save" : `Add ${kind}`}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3">
         <Field label="Amount">
           <Input
+            className="h-10"
             type="number"
             min="0.01"
             step="0.01"
@@ -129,6 +131,7 @@ export function EntryDialog({
         </Field>
         <Field label="Date">
           <Input
+            className="h-10"
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
@@ -138,8 +141,8 @@ export function EntryDialog({
         {kind === "expense" ? (
           <Field label="Category">
             <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose category" />
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Choose" />
               </SelectTrigger>
               <SelectContent>
                 {catList.map((c) => (
@@ -153,8 +156,8 @@ export function EntryDialog({
         ) : (
           <Field label="Source">
             <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose source" />
+              <SelectTrigger className="h-10">
+                <SelectValue placeholder="Choose" />
               </SelectTrigger>
               <SelectContent>
                 {catList.map((c) => (
@@ -166,12 +169,12 @@ export function EntryDialog({
             </Select>
           </Field>
         )}
-        <Field label="Payment method">
+        <Field label="Method">
           <Select
             value={form.payment_method}
             onValueChange={(v) => setForm({ ...form, payment_method: v })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-10">
               <SelectValue placeholder="Method" />
             </SelectTrigger>
             <SelectContent>
@@ -185,8 +188,8 @@ export function EntryDialog({
         </Field>
         <Field label="Account">
           <Select value={form.account_id} onValueChange={(v) => setForm({ ...form, account_id: v })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose account" />
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Choose" />
             </SelectTrigger>
             <SelectContent>
               {(accounts.data ?? []).map((a) => (
@@ -199,22 +202,35 @@ export function EntryDialog({
         </Field>
         <Field label="Description">
           <Input
+            className="h-10"
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Optional"
           />
         </Field>
       </div>
-      <Field label="Notes">
-        <Textarea
-          value={form.notes}
-          onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          rows={2}
-        />
-      </Field>
+
+      {showNotes || form.notes ? (
+        <Field label="Notes">
+          <Textarea
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            rows={2}
+          />
+        </Field>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowNotes(true)}
+          className="text-xs font-semibold text-primary"
+        >
+          + Add note
+        </button>
+      )}
     </FormDialog>
   );
 }
+
 
 /** Borrowed money (I owe someone) */
 export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {

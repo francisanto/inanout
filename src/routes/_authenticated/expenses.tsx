@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Minus, TrendingDown } from "lucide-react";
+import { Minus, Pencil, Trash2, TrendingDown } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,18 +11,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  ConfirmDelete,
   EmptyState,
-  Field,
-  FormDialog,
   LoadingBlock,
   PageHeader,
   RangeFilter,
   useRangeState,
 } from "@/components/kit";
+import { CategoryManager } from "@/components/category-manager";
+import { TxRow } from "@/components/tx-list";
 import { EntryDialog } from "@/components/quick-actions";
-import { useCategories, useCurrency, useSaveRow, useTransactions } from "@/hooks/use-data";
+import { useCurrency, useDeleteRow, useTransactions } from "@/hooks/use-data";
 import { inRange, useCategoryBreakdown, useSeries } from "@/hooks/use-summary";
 import { format, formatMoney, parseDate } from "@/lib/finance";
+import type { Transaction } from "@/lib/types";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
   head: () => ({
@@ -44,10 +45,8 @@ function ExpensesPage() {
   const { state, setState, range } = useRangeState("month");
   const [topView, setTopView] = useState<TopSpendView>("categories");
   const tx = useTransactions();
-  const categories = useCategories();
-  const saveCategory = useSaveRow("categories", "Category added");
-  const [newCategory, setNewCategory] = useState("");
-  const [catOpen, setCatOpen] = useState(false);
+  const del = useDeleteRow("transactions", "Expense deleted");
+  const [editing, setEditing] = useState<Transaction | null>(null);
 
   const scoped = useMemo(
     () => (tx.data ?? []).filter((t) => t.type === "expense" && inRange(t.date, range)),
@@ -55,6 +54,7 @@ function ExpensesPage() {
   );
   const series = useSeries(scoped, "daily");
   const byCategory = useCategoryBreakdown(scoped, "expense");
+
 
   const total = scoped.reduce((t, r) => t + Number(r.amount), 0);
 
@@ -82,28 +82,12 @@ function ExpensesPage() {
         description={`${range.label} · ${formatMoney(total, currency)} spent`}
         actions={
           <>
-            <FormDialog
-              open={catOpen}
-              onOpenChange={setCatOpen}
-              trigger={<Button size="sm" variant="outline">New category</Button>}
-              title="Add expense category"
-              submitLabel="Add category"
-              submitting={saveCategory.isPending}
-              onSubmit={async () => {
-                if (!newCategory.trim()) return;
-                await saveCategory.mutateAsync({ name: newCategory.trim(), kind: "expense" });
-                setNewCategory("");
-                setCatOpen(false);
-              }}
-            >
-              <Field label="Category name">
-                <Input value={newCategory} onChange={(e) => setNewCategory(e.target.value)} required />
-              </Field>
-            </FormDialog>
+            <CategoryManager kind="expense" />
             <EntryDialog kind="expense" trigger={<Button size="sm"><Minus className="h-4 w-4" /> Add</Button>} />
           </>
         }
       />
+
 
       <RangeFilter state={state} onChange={setState} />
 
@@ -161,7 +145,52 @@ function ExpensesPage() {
         )}
       </section>
 
-      {categories.isLoading ? null : null}
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Expenses</h2>
+        {tx.isLoading ? (
+          <LoadingBlock rows={3} />
+        ) : scoped.length === 0 ? (
+          <EmptyState title="No expenses in this period" description="Add one with the button above." icon={TrendingDown} />
+        ) : (
+          <ul className="card-surface divide-y divide-border">
+            {scoped.map((t) => (
+              <TxRow
+                key={t.id}
+                tx={t}
+                currency={currency}
+                actions={
+                  <>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditing(t)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <ConfirmDelete
+                      onConfirm={() => del.mutate(t.id)}
+                      trigger={
+                        <Button size="icon" variant="ghost" className="h-8 w-8">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      }
+                    />
+                  </>
+                }
+              />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {editing ? (
+        <EntryDialog
+          key={editing.id}
+          kind="expense"
+          existing={editing}
+          open
+          onOpenChange={(open) => {
+            if (!open) setEditing(null);
+          }}
+        />
+      ) : null}
+
     </div>
   );
 }
