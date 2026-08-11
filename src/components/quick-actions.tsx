@@ -64,6 +64,8 @@ export function EntryDialog({
   });
 
   const [form, setForm] = useState(blank);
+  const [showNotes, setShowNotes] = useState(false);
+
 
   const setOpen = (next: boolean) => {
     if (!next) setForm(blank());
