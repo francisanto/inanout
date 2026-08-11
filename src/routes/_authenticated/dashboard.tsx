@@ -119,6 +119,10 @@ function Dashboard() {
         )}
       </section>
 
+      <DailyPlanCard currency={currency} />
+
+
+
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="card-surface p-4">
           <div className="mb-3 flex items-center justify-between gap-3">
