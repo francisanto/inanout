@@ -85,7 +85,9 @@ export function useDailyPlan(trim = 0.1): DailyPlan {
     );
 
     const avgPerDay = total / spanDays;
-    const dailyLimit = Math.round(avgPerDay * (1 - trim));
+    const suggestedLimit = Math.round(avgPerDay * (1 - trim));
+    const isCustom = customLimit != null && customLimit > 0;
+    const dailyLimit = isCustom ? Math.round(Number(customLimit)) : suggestedLimit;
 
     const categories: CategoryPlan[] = [...byCategory.entries()]
       .map(([category, v]) => {
@@ -101,10 +103,13 @@ export function useDailyPlan(trim = 0.1): DailyPlan {
       .sort((a, b) => b.spentTotal - a.spentTotal);
 
     return {
-      loading: tx.isLoading,
+      loading: tx.isLoading || profile.isLoading,
       days: spanDays,
       avgPerDay,
       dailyLimit,
+      suggestedLimit,
+      isCustom,
+      lookbackDays,
       todaySpent,
       remainingToday: dailyLimit - todaySpent,
       percentUsed: dailyLimit ? Math.round((todaySpent / dailyLimit) * 100) : 0,
@@ -112,5 +117,6 @@ export function useDailyPlan(trim = 0.1): DailyPlan {
       topCategory: categories[0] ?? null,
       hasData: rows.length > 0,
     };
-  }, [tx.data, tx.isLoading, lookbackDays, trim]);
+  }, [tx.data, tx.isLoading, profile.isLoading, lookbackDays, customLimit, trim]);
+
 }
