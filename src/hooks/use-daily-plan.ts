@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { useTransactions } from "@/hooks/use-data";
+import { useProfile, useTransactions } from "@/hooks/use-data";
 import { toISO } from "@/lib/finance";
+
 
 export interface CategoryPlan {
   category: string;
