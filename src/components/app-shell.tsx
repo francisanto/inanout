@@ -144,7 +144,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </div>
                 <ScrollArea className="flex-1 px-3 py-4">
                   <nav className="space-y-1">
-                    {NAV_ITEMS.map((item) => {
+                    {MOBILE_SHEET_ITEMS.map((item) => {
+
                       const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
                       return (
                         <SheetClose asChild key={item.to}>
