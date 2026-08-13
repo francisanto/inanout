@@ -2,7 +2,9 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
   CreditCard,
+  Gauge,
   LayoutDashboard,
+
   ListOrdered,
   LogOut,
   Menu,
