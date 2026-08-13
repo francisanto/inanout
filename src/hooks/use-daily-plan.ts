@@ -37,13 +37,18 @@ export interface DailyPlan {
 const DAY_MS = 86_400_000;
 
 /**
- * Looks at the last `lookbackDays` of expenses and derives a recommended
- * daily spending limit, split across the categories actually used.
+ * Looks at the last N days of expenses (from the user's settings) and derives a
+ * recommended daily spending limit, split across the categories actually used.
+ * A custom limit saved on the profile overrides the suggestion.
  */
-export function useDailyPlan(lookbackDays = 90, trim = 0.1): DailyPlan {
+export function useDailyPlan(trim = 0.1): DailyPlan {
   const tx = useTransactions();
+  const profile = useProfile();
+  const lookbackDays = profile.data?.daily_plan_lookback ?? 90;
+  const customLimit = profile.data?.daily_limit ?? null;
 
   return useMemo(() => {
+
     const now = new Date();
     const todayKey = toISO(now);
     const fromKey = toISO(new Date(now.getTime() - lookbackDays * DAY_MS));
