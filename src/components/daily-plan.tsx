@@ -1,7 +1,98 @@
-import { Gauge, Sparkles } from "lucide-react";
-import { EmptyState, LoadingBlock, ProgressBar } from "@/components/kit";
+import { useEffect, useState } from "react";
+import { Gauge, Settings2, Sparkles } from "lucide-react";
+import { EmptyState, Field, FormDialog, LoadingBlock, ProgressBar } from "@/components/kit";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDailyPlan } from "@/hooks/use-daily-plan";
+import { useProfile, useSaveRow } from "@/hooks/use-data";
 import { formatMoney } from "@/lib/finance";
+
+const LOOKBACK_OPTIONS = [
+  { value: "30", label: "Last 30 days" },
+  { value: "60", label: "Last 60 days" },
+  { value: "90", label: "Last 90 days" },
+  { value: "180", label: "Last 180 days" },
+  { value: "365", label: "Last 365 days" },
+];
+
+/** Lets the user override the suggested daily limit and history window. */
+export function DailyPlanSettings({ suggested }: { suggested: number }) {
+  const { data: profile } = useProfile();
+  const save = useSaveRow("profiles", "Daily plan updated");
+  const [open, setOpen] = useState(false);
+  const [limit, setLimit] = useState("");
+  const [lookback, setLookback] = useState("90");
+
+  useEffect(() => {
+    if (!open) return;
+    setLimit(profile?.daily_limit ? String(profile.daily_limit) : "");
+    setLookback(String(profile?.daily_plan_lookback ?? 90));
+  }, [open, profile?.daily_limit, profile?.daily_plan_lookback]);
+
+  const submit = async () => {
+    if (!profile?.id) return;
+    await save.mutateAsync({
+      id: profile.id,
+      daily_limit: limit.trim() ? Number(limit) : null,
+      daily_plan_lookback: Number(lookback),
+    });
+    setOpen(false);
+  };
+
+  return (
+    <FormDialog
+      compact
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button size="sm" variant="outline" className="gap-1.5">
+          <Settings2 className="h-4 w-4" /> Customise
+        </Button>
+      }
+      title="Customise daily plan"
+      description="Set your own daily limit or change how much history is analysed."
+      onSubmit={submit}
+      submitting={save.isPending}
+    >
+      <Field
+        label="My daily limit"
+        hint={`Leave empty to use the suggestion from your history (${suggested}).`}
+      >
+        <Input
+          className="h-10"
+          type="number"
+          min="0"
+          step="1"
+          inputMode="decimal"
+          placeholder={String(suggested)}
+          value={limit}
+          onChange={(e) => setLimit(e.target.value)}
+        />
+      </Field>
+      <Field label="Analyse history">
+        <Select value={lookback} onValueChange={setLookback}>
+          <SelectTrigger className="h-10">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {LOOKBACK_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
+    </FormDialog>
+  );
+}
 
 /** Spend analysis + a recommended daily limit derived from past categories. */
 export function DailyPlanCard({ currency }: { currency: string }) {
@@ -19,7 +110,10 @@ export function DailyPlanCard({ currency }: { currency: string }) {
   if (!plan.hasData) {
     return (
       <section className="card-surface p-4">
-        <h2 className="mb-4 text-base font-semibold">Daily spend plan</h2>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold">Daily spend plan</h2>
+          <DailyPlanSettings suggested={plan.suggestedLimit} />
+        </div>
         <EmptyState
           title="Not enough history yet"
           description="Log a few expenses and I'll suggest a daily limit from your own spending pattern."
@@ -34,14 +128,18 @@ export function DailyPlanCard({ currency }: { currency: string }) {
 
   return (
     <section className="card-surface p-4">
-      <div className="mb-3 flex items-start justify-between gap-3">
+      <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold">Daily spend plan</h2>
+          <h2 className="flex items-center gap-2 text-base font-semibold">
+            <Gauge className="h-4 w-4 shrink-0 text-primary" /> Daily spend plan
+          </h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            From the last {plan.days} days · avg {formatMoney(Math.round(plan.avgPerDay), currency)}/day
+            {plan.isCustom
+              ? `Your own limit · suggestion ${formatMoney(plan.suggestedLimit, currency)}/day`
+              : `From the last ${plan.days} days · avg ${formatMoney(Math.round(plan.avgPerDay), currency)}/day`}
           </p>
         </div>
-        <Gauge className="h-4 w-4 shrink-0 text-primary" />
+        <DailyPlanSettings suggested={plan.suggestedLimit} />
       </div>
 
       <div className="rounded-xl bg-muted/50 p-3">
@@ -79,7 +177,7 @@ export function DailyPlanCard({ currency }: { currency: string }) {
       ) : null}
 
       <ul className="mt-3 space-y-2">
-        {plan.categories.slice(0, 5).map((c) => {
+        {plan.categories.slice(0, 8).map((c) => {
           const percent = c.perDay ? Math.round((c.todaySpent / c.perDay) * 100) : 0;
           return (
             <li key={c.category} className="rounded-xl bg-muted/40 px-3 py-2">

@@ -25,7 +25,6 @@ import {
   useRangeState,
 } from "@/components/kit";
 import { QuickActions } from "@/components/quick-actions";
-import { DailyPlanCard } from "@/components/daily-plan";
 import { TxRow } from "@/components/tx-list";
 import { useCurrency } from "@/hooks/use-data";
 import { useFinanceSummary, useSeries, useUpcomingObligations } from "@/hooks/use-summary";
@@ -119,7 +118,8 @@ function Dashboard() {
         )}
       </section>
 
-      <DailyPlanCard currency={currency} />
+
+
 
 
 

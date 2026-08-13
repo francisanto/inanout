@@ -2,7 +2,9 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
   CreditCard,
+  Gauge,
   LayoutDashboard,
+
   ListOrdered,
   LogOut,
   Menu,
@@ -33,6 +35,7 @@ export const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/expenses", label: "Expenses", icon: TrendingDown },
   { to: "/income", label: "Income", icon: TrendingUp },
+  { to: "/daily-plan", label: "Daily plan", icon: Gauge },
   { to: "/debts", label: "Debts", icon: CreditCard },
   { to: "/lending", label: "Lending", icon: ArrowLeftRight },
   { to: "/savings", label: "Savings", icon: PiggyBank },
@@ -47,6 +50,10 @@ const MOBILE_TAB_PATHS = new Set(["/dashboard", "/expenses", "/transactions", "/
 export const MOBILE_MORE_ITEMS = NAV_ITEMS.filter(
   (item) => !MOBILE_TAB_PATHS.has(item.to),
 );
+
+/** Sidebar items for the mobile drawer: hides pages already in the bottom bar. */
+const MOBILE_SHEET_ITEMS = NAV_ITEMS.filter((item) => item.to !== "/settings");
+
 
 const MOBILE_ITEMS = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -137,7 +144,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </div>
                 <ScrollArea className="flex-1 px-3 py-4">
                   <nav className="space-y-1">
-                    {NAV_ITEMS.map((item) => {
+                    {MOBILE_SHEET_ITEMS.map((item) => {
+
                       const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
                       return (
                         <SheetClose asChild key={item.to}>

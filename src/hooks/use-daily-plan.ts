@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { useTransactions } from "@/hooks/use-data";
+import { useProfile, useTransactions } from "@/hooks/use-data";
 import { toISO } from "@/lib/finance";
+
 
 export interface CategoryPlan {
   category: string;
@@ -18,6 +19,12 @@ export interface DailyPlan {
   avgPerDay: number;
   /** Recommended daily limit (slightly under the average to trim spending). */
   dailyLimit: number;
+  /** The limit suggested from history, ignoring any custom override. */
+  suggestedLimit: number;
+  /** True when the user set their own limit. */
+  isCustom: boolean;
+  /** Lookback window in days, from the user's settings. */
+  lookbackDays: number;
   todaySpent: number;
   remainingToday: number;
   percentUsed: number;
@@ -26,16 +33,22 @@ export interface DailyPlan {
   hasData: boolean;
 }
 
+
 const DAY_MS = 86_400_000;
 
 /**
- * Looks at the last `lookbackDays` of expenses and derives a recommended
- * daily spending limit, split across the categories actually used.
+ * Looks at the last N days of expenses (from the user's settings) and derives a
+ * recommended daily spending limit, split across the categories actually used.
+ * A custom limit saved on the profile overrides the suggestion.
  */
-export function useDailyPlan(lookbackDays = 90, trim = 0.1): DailyPlan {
+export function useDailyPlan(trim = 0.1): DailyPlan {
   const tx = useTransactions();
+  const profile = useProfile();
+  const lookbackDays = profile.data?.daily_plan_lookback ?? 90;
+  const customLimit = profile.data?.daily_limit ?? null;
 
   return useMemo(() => {
+
     const now = new Date();
     const todayKey = toISO(now);
     const fromKey = toISO(new Date(now.getTime() - lookbackDays * DAY_MS));
@@ -72,7 +85,9 @@ export function useDailyPlan(lookbackDays = 90, trim = 0.1): DailyPlan {
     );
 
     const avgPerDay = total / spanDays;
-    const dailyLimit = Math.round(avgPerDay * (1 - trim));
+    const suggestedLimit = Math.round(avgPerDay * (1 - trim));
+    const isCustom = customLimit != null && customLimit > 0;
+    const dailyLimit = isCustom ? Math.round(Number(customLimit)) : suggestedLimit;
 
     const categories: CategoryPlan[] = [...byCategory.entries()]
       .map(([category, v]) => {
@@ -88,10 +103,13 @@ export function useDailyPlan(lookbackDays = 90, trim = 0.1): DailyPlan {
       .sort((a, b) => b.spentTotal - a.spentTotal);
 
     return {
-      loading: tx.isLoading,
+      loading: tx.isLoading || profile.isLoading,
       days: spanDays,
       avgPerDay,
       dailyLimit,
+      suggestedLimit,
+      isCustom,
+      lookbackDays,
       todaySpent,
       remainingToday: dailyLimit - todaySpent,
       percentUsed: dailyLimit ? Math.round((todaySpent / dailyLimit) * 100) : 0,
@@ -99,5 +117,6 @@ export function useDailyPlan(lookbackDays = 90, trim = 0.1): DailyPlan {
       topCategory: categories[0] ?? null,
       hasData: rows.length > 0,
     };
-  }, [tx.data, tx.isLoading, lookbackDays, trim]);
+  }, [tx.data, tx.isLoading, profile.isLoading, lookbackDays, customLimit, trim]);
+
 }

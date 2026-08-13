@@ -7,6 +7,9 @@ export interface Profile {
   salary_amount?: number;
   salary_day?: number | null;
   salary_last_posted?: string | null;
+  daily_limit?: number | null;
+  daily_plan_lookback?: number | null;
+
 }
 
 export interface Account {
