@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/daily-plan")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: DailyPlanPage;
+  component: DailyPlanPage,
 });
 
 function DailyPlanPage() {
