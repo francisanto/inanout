@@ -19,6 +19,12 @@ export interface DailyPlan {
   avgPerDay: number;
   /** Recommended daily limit (slightly under the average to trim spending). */
   dailyLimit: number;
+  /** The limit suggested from history, ignoring any custom override. */
+  suggestedLimit: number;
+  /** True when the user set their own limit. */
+  isCustom: boolean;
+  /** Lookback window in days, from the user's settings. */
+  lookbackDays: number;
   todaySpent: number;
   remainingToday: number;
   percentUsed: number;
@@ -26,6 +32,7 @@ export interface DailyPlan {
   topCategory: CategoryPlan | null;
   hasData: boolean;
 }
+
 
 const DAY_MS = 86_400_000;
 
