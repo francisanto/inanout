@@ -131,13 +131,14 @@ export function EntryDialog({
         </Field>
         <Field label="Date">
           <Input
-            className="h-10"
+            className="h-10 w-full min-w-0 px-2 text-sm [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0 [&::-webkit-calendar-picker-indicator]:p-0"
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
             required
           />
         </Field>
+
         {kind === "expense" ? (
           <Field label="Category">
             <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
