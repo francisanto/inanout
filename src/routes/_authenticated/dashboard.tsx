@@ -119,7 +119,8 @@ function Dashboard() {
         )}
       </section>
 
-      <DailyPlanCard currency={currency} />
+
+
 
 
 
