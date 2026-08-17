@@ -46,8 +46,10 @@ export function useDailyPlan(trim = 0.1): DailyPlan {
   const profile = useProfile();
   const lookbackDays = profile.data?.daily_plan_lookback ?? 90;
   const customLimit = profile.data?.daily_limit ?? null;
+  const categoryLimits = profile.data?.category_limits ?? null;
 
   return useMemo(() => {
+
 
     const now = new Date();
     const todayKey = toISO(now);
