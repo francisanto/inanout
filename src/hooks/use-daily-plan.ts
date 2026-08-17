@@ -91,18 +91,25 @@ export function useDailyPlan(trim = 0.1): DailyPlan {
     const isCustom = customLimit != null && customLimit > 0;
     const dailyLimit = isCustom ? Math.round(Number(customLimit)) : suggestedLimit;
 
-    const categories: CategoryPlan[] = [...byCategory.entries()]
-      .map(([category, v]) => {
+    const overrides = categoryLimits ?? {};
+    const names = new Set([...byCategory.keys(), ...Object.keys(overrides)]);
+
+    const categories: CategoryPlan[] = [...names]
+      .map((category) => {
+        const v = byCategory.get(category) ?? { total: 0, today: 0 };
         const share = total ? v.total / total : 0;
+        const override = Number(overrides[category] ?? 0);
         return {
           category,
           spentTotal: v.total,
           share,
-          perDay: Math.round(dailyLimit * share),
+          perDay: override > 0 ? Math.round(override) : Math.round(dailyLimit * share),
+          isCustomPerDay: override > 0,
           todaySpent: v.today,
         };
       })
-      .sort((a, b) => b.spentTotal - a.spentTotal);
+      .sort((a, b) => b.spentTotal - a.spentTotal || a.category.localeCompare(b.category));
+
 
     return {
       loading: tx.isLoading || profile.isLoading,
