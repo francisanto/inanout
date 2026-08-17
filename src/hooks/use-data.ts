@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PAYMENT_METHODS } from "@/lib/finance";
+
 import type {
   Account,
   Borrowing,
