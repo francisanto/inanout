@@ -155,6 +155,9 @@ export function DailyPlanSettings({
 /** Spend analysis + a recommended daily limit derived from past categories. */
 export function DailyPlanCard({ currency }: { currency: string }) {
   const plan = useDailyPlan();
+  const suggestedByCategory = Object.fromEntries(
+    plan.categories.map((c) => [c.category, c.perDay]),
+  );
 
   if (plan.loading) {
     return (
@@ -170,7 +173,7 @@ export function DailyPlanCard({ currency }: { currency: string }) {
       <section className="card-surface p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-base font-semibold">Daily spend plan</h2>
-          <DailyPlanSettings suggested={plan.suggestedLimit} />
+          <DailyPlanSettings suggested={plan.suggestedLimit} suggestedByCategory={suggestedByCategory} />
         </div>
         <EmptyState
           title="Not enough history yet"
@@ -197,7 +200,7 @@ export function DailyPlanCard({ currency }: { currency: string }) {
               : `From the last ${plan.days} days · avg ${formatMoney(Math.round(plan.avgPerDay), currency)}/day`}
           </p>
         </div>
-        <DailyPlanSettings suggested={plan.suggestedLimit} />
+        <DailyPlanSettings suggested={plan.suggestedLimit} suggestedByCategory={suggestedByCategory} />
       </div>
 
       <div className="rounded-xl bg-muted/50 p-3">
