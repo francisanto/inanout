@@ -8,6 +8,8 @@ export interface CategoryPlan {
   spentTotal: number;
   share: number;
   perDay: number;
+  /** True when the user set a per-day limit for this category. */
+  isCustomPerDay: boolean;
   todaySpent: number;
 }
 
@@ -126,6 +128,6 @@ export function useDailyPlan(trim = 0.1): DailyPlan {
       topCategory: categories[0] ?? null,
       hasData: rows.length > 0,
     };
-  }, [tx.data, tx.isLoading, profile.isLoading, lookbackDays, customLimit, trim]);
+  }, [tx.data, tx.isLoading, profile.isLoading, lookbackDays, customLimit, categoryLimits, trim]);
 
 }
