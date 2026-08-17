@@ -19,9 +19,10 @@ import {
   useCategories,
   useDebts,
   useInvalidateAll,
+  usePaymentMethods,
   useSaveRow,
 } from "@/hooks/use-data";
-import { PAYMENT_METHODS, toISO } from "@/lib/finance";
+import { toISO } from "@/lib/finance";
 import { supabase } from "@/integrations/supabase/client";
 import type { Transaction } from "@/lib/types";
 
@@ -48,6 +49,7 @@ export function EntryDialog({
 }) {
   const accounts = useAccounts();
   const categories = useCategories();
+  const paymentMethods = usePaymentMethods();
   const save = useSaveRow("transactions", kind === "expense" ? "Expense saved" : "Income saved");
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ?? internalOpen;
@@ -179,7 +181,7 @@ export function EntryDialog({
               <SelectValue placeholder="Method" />
             </SelectTrigger>
             <SelectContent>
-              {PAYMENT_METHODS.map((m) => (
+              {paymentMethods.map((m) => (
                 <SelectItem key={m} value={m}>
                   {m}
                 </SelectItem>
