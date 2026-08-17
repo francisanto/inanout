@@ -319,6 +319,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          category_limits: Json
           created_at: string
           currency: string
           daily_limit: number | null
@@ -327,12 +328,15 @@ export type Database = {
           full_name: string | null
           id: string
           monthly_savings_target: number
+          payment_methods: string[] | null
+          salary_account_id: string | null
           salary_amount: number
           salary_day: number | null
           salary_last_posted: string | null
           updated_at: string
         }
         Insert: {
+          category_limits?: Json
           created_at?: string
           currency?: string
           daily_limit?: number | null
@@ -341,12 +345,15 @@ export type Database = {
           full_name?: string | null
           id: string
           monthly_savings_target?: number
+          payment_methods?: string[] | null
+          salary_account_id?: string | null
           salary_amount?: number
           salary_day?: number | null
           salary_last_posted?: string | null
           updated_at?: string
         }
         Update: {
+          category_limits?: Json
           created_at?: string
           currency?: string
           daily_limit?: number | null
@@ -355,12 +362,22 @@ export type Database = {
           full_name?: string | null
           id?: string
           monthly_savings_target?: number
+          payment_methods?: string[] | null
+          salary_account_id?: string | null
           salary_amount?: number
           salary_day?: number | null
           salary_last_posted?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_salary_account_id_fkey"
+            columns: ["salary_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       recurring_payments: {
         Row: {

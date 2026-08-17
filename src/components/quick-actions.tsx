@@ -19,9 +19,10 @@ import {
   useCategories,
   useDebts,
   useInvalidateAll,
+  usePaymentMethods,
   useSaveRow,
 } from "@/hooks/use-data";
-import { PAYMENT_METHODS, toISO } from "@/lib/finance";
+import { toISO } from "@/lib/finance";
 import { supabase } from "@/integrations/supabase/client";
 import type { Transaction } from "@/lib/types";
 
@@ -48,6 +49,7 @@ export function EntryDialog({
 }) {
   const accounts = useAccounts();
   const categories = useCategories();
+  const paymentMethods = usePaymentMethods();
   const save = useSaveRow("transactions", kind === "expense" ? "Expense saved" : "Income saved");
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = open ?? internalOpen;
@@ -179,7 +181,7 @@ export function EntryDialog({
               <SelectValue placeholder="Method" />
             </SelectTrigger>
             <SelectContent>
-              {PAYMENT_METHODS.map((m) => (
+              {paymentMethods.map((m) => (
                 <SelectItem key={m} value={m}>
                   {m}
                 </SelectItem>
@@ -237,6 +239,7 @@ export function EntryDialog({
 export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const invalidate = useInvalidateAll();
   const [form, setForm] = useState({
     person_name: "",
@@ -302,48 +305,67 @@ export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {
         setOpen(next);
         if (!next) setForm({ person_name: "", amount: "", date: today(), due_date: "", notes: "" });
       }}
+      compact
       title="Borrowed money"
-      description="Money you took from someone and need to repay."
       onSubmit={submit}
       submitting={saving}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Person">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Person" className="col-span-2">
           <Input
+            className="h-10"
             value={form.person_name}
             onChange={(e) => setForm({ ...form, person_name: e.target.value })}
             placeholder="Rahul"
             required
           />
         </Field>
-        <Field label="Amount borrowed">
+        <Field label="Amount">
           <Input
+            className="h-10"
             type="number"
             min="0.01"
             step="0.01"
+            inputMode="decimal"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             required
           />
         </Field>
-        <Field label="Date borrowed">
+        <Field label="Date">
           <Input
+            className="h-10 w-full min-w-0 px-2 text-sm"
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
           />
         </Field>
-        <Field label="Due date">
+        <Field label="Due date" className="col-span-2">
           <Input
+            className="h-10 w-full min-w-0 px-2 text-sm"
             type="date"
             value={form.due_date}
             onChange={(e) => setForm({ ...form, due_date: e.target.value })}
           />
         </Field>
       </div>
-      <Field label="Notes">
-        <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
-      </Field>
+      {showNotes || form.notes ? (
+        <Field label="Notes">
+          <Textarea
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            rows={2}
+          />
+        </Field>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowNotes(true)}
+          className="text-xs font-semibold text-primary"
+        >
+          + Add note
+        </button>
+      )}
     </FormDialog>
   );
 }
@@ -352,6 +374,7 @@ export function BorrowDialog({ trigger }: { trigger?: React.ReactNode }) {
 export function LendDialog({ trigger }: { trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const invalidate = useInvalidateAll();
   const [form, setForm] = useState({
     person_name: "",
@@ -418,25 +441,28 @@ export function LendDialog({ trigger }: { trigger?: React.ReactNode }) {
         if (!next)
           setForm({ person_name: "", amount: "", date: today(), expected_return_date: "", notes: "" });
       }}
+      compact
       title="Lent money"
-      description="Money you gave someone and expect back."
       onSubmit={submit}
       submitting={saving}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Person">
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Person" className="col-span-2">
           <Input
+            className="h-10"
             value={form.person_name}
             onChange={(e) => setForm({ ...form, person_name: e.target.value })}
             placeholder="Akhil"
             required
           />
         </Field>
-        <Field label="Amount lent">
+        <Field label="Amount">
           <Input
+            className="h-10"
             type="number"
             min="0.01"
             step="0.01"
+            inputMode="decimal"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
             required
@@ -444,22 +470,38 @@ export function LendDialog({ trigger }: { trigger?: React.ReactNode }) {
         </Field>
         <Field label="Date">
           <Input
+            className="h-10 w-full min-w-0 px-2 text-sm"
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
           />
         </Field>
-        <Field label="Expected return">
+        <Field label="Expected return" className="col-span-2">
           <Input
+            className="h-10 w-full min-w-0 px-2 text-sm"
             type="date"
             value={form.expected_return_date}
             onChange={(e) => setForm({ ...form, expected_return_date: e.target.value })}
           />
         </Field>
       </div>
-      <Field label="Notes">
-        <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
-      </Field>
+      {showNotes || form.notes ? (
+        <Field label="Notes">
+          <Textarea
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            rows={2}
+          />
+        </Field>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowNotes(true)}
+          className="text-xs font-semibold text-primary"
+        >
+          + Add note
+        </button>
+      )}
     </FormDialog>
   );
 }

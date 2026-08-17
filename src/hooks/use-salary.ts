@@ -38,9 +38,11 @@ export function useSalaryAutoPost() {
         date: due,
         category: "Salary",
         source: "Salary",
+        account_id: profile.salary_account_id ?? null,
         description: "Monthly salary",
         is_recurring: true,
       } as never);
+
       if (error) return;
       await supabase
         .from("profiles")

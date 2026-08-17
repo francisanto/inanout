@@ -9,8 +9,11 @@ export interface Profile {
   salary_last_posted?: string | null;
   daily_limit?: number | null;
   daily_plan_lookback?: number | null;
-
+  salary_account_id?: string | null;
+  payment_methods?: string[] | null;
+  category_limits?: Record<string, number> | null;
 }
+
 
 export interface Account {
   id: string;

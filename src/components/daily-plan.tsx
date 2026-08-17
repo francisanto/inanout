@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CategoryManager } from "@/components/category-manager";
 import { useDailyPlan } from "@/hooks/use-daily-plan";
-import { useProfile, useSaveRow } from "@/hooks/use-data";
+import { useCategories, useProfile, useSaveRow } from "@/hooks/use-data";
 import { formatMoney } from "@/lib/finance";
 
 const LOOKBACK_OPTIONS = [
@@ -22,26 +23,46 @@ const LOOKBACK_OPTIONS = [
   { value: "365", label: "Last 365 days" },
 ];
 
-/** Lets the user override the suggested daily limit and history window. */
-export function DailyPlanSettings({ suggested }: { suggested: number }) {
+/** Lets the user override the suggested daily limit, categories and history window. */
+export function DailyPlanSettings({
+  suggested,
+  suggestedByCategory = {},
+}: {
+  suggested: number;
+  suggestedByCategory?: Record<string, number>;
+}) {
   const { data: profile } = useProfile();
+  const categories = useCategories();
   const save = useSaveRow("profiles", "Daily plan updated");
   const [open, setOpen] = useState(false);
   const [limit, setLimit] = useState("");
   const [lookback, setLookback] = useState("90");
+  const [catLimits, setCatLimits] = useState<Record<string, string>>({});
+
+  const expenseCats = (categories.data ?? []).filter((c) => c.kind === "expense");
 
   useEffect(() => {
     if (!open) return;
     setLimit(profile?.daily_limit ? String(profile.daily_limit) : "");
     setLookback(String(profile?.daily_plan_lookback ?? 90));
-  }, [open, profile?.daily_limit, profile?.daily_plan_lookback]);
+    const saved = profile?.category_limits ?? {};
+    setCatLimits(
+      Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, v ? String(v) : ""])),
+    );
+  }, [open, profile?.daily_limit, profile?.daily_plan_lookback, profile?.category_limits]);
 
   const submit = async () => {
     if (!profile?.id) return;
+    const cleaned: Record<string, number> = {};
+    for (const [name, value] of Object.entries(catLimits)) {
+      const n = Number(value);
+      if (value.trim() && Number.isFinite(n) && n > 0) cleaned[name] = n;
+    }
     await save.mutateAsync({
       id: profile.id,
       daily_limit: limit.trim() ? Number(limit) : null,
       daily_plan_lookback: Number(lookback),
+      category_limits: cleaned,
     });
     setOpen(false);
   };
@@ -57,46 +78,86 @@ export function DailyPlanSettings({ suggested }: { suggested: number }) {
         </Button>
       }
       title="Customise daily plan"
-      description="Set your own daily limit or change how much history is analysed."
+      description="Set your daily limit, per-category limits and how much history is analysed."
       onSubmit={submit}
       submitting={save.isPending}
     >
-      <Field
-        label="My daily limit"
-        hint={`Leave empty to use the suggestion from your history (${suggested}).`}
-      >
-        <Input
-          className="h-10"
-          type="number"
-          min="0"
-          step="1"
-          inputMode="decimal"
-          placeholder={String(suggested)}
-          value={limit}
-          onChange={(e) => setLimit(e.target.value)}
-        />
-      </Field>
-      <Field label="Analyse history">
-        <Select value={lookback} onValueChange={setLookback}>
-          <SelectTrigger className="h-10">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {LOOKBACK_OPTIONS.map((o) => (
-              <SelectItem key={o.value} value={o.value}>
-                {o.label}
-              </SelectItem>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="My daily limit" hint={`Empty = suggested (${suggested})`}>
+          <Input
+            className="h-10"
+            type="number"
+            min="0"
+            step="1"
+            inputMode="decimal"
+            placeholder={String(suggested)}
+            value={limit}
+            onChange={(e) => setLimit(e.target.value)}
+          />
+        </Field>
+        <Field label="Analyse history">
+          <Select value={lookback} onValueChange={setLookback}>
+            <SelectTrigger className="h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LOOKBACK_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Per-category limit / day
+          </p>
+          <CategoryManager
+            kind="expense"
+            trigger={
+              <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                + Add category
+              </Button>
+            }
+          />
+        </div>
+        {expenseCats.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Add a category first.</p>
+        ) : (
+          <ul className="max-h-52 space-y-1.5 overflow-y-auto rounded-xl border border-border p-2">
+            {expenseCats.map((c) => (
+              <li key={c.id} className="grid grid-cols-[minmax(0,1fr)_5.5rem] items-center gap-2">
+                <span className="min-w-0 truncate text-sm">{c.name}</span>
+                <Input
+                  className="h-9 px-2 text-sm"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputMode="decimal"
+                  placeholder={String(suggestedByCategory[c.name] ?? 0)}
+                  value={catLimits[c.name] ?? ""}
+                  onChange={(e) => setCatLimits({ ...catLimits, [c.name]: e.target.value })}
+                />
+              </li>
             ))}
-          </SelectContent>
-        </Select>
-      </Field>
+          </ul>
+        )}
+      </div>
     </FormDialog>
   );
 }
 
+
 /** Spend analysis + a recommended daily limit derived from past categories. */
 export function DailyPlanCard({ currency }: { currency: string }) {
   const plan = useDailyPlan();
+  const suggestedByCategory = Object.fromEntries(
+    plan.categories.map((c) => [c.category, c.perDay]),
+  );
 
   if (plan.loading) {
     return (
@@ -112,7 +173,7 @@ export function DailyPlanCard({ currency }: { currency: string }) {
       <section className="card-surface p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-base font-semibold">Daily spend plan</h2>
-          <DailyPlanSettings suggested={plan.suggestedLimit} />
+          <DailyPlanSettings suggested={plan.suggestedLimit} suggestedByCategory={suggestedByCategory} />
         </div>
         <EmptyState
           title="Not enough history yet"
@@ -139,7 +200,7 @@ export function DailyPlanCard({ currency }: { currency: string }) {
               : `From the last ${plan.days} days · avg ${formatMoney(Math.round(plan.avgPerDay), currency)}/day`}
           </p>
         </div>
-        <DailyPlanSettings suggested={plan.suggestedLimit} />
+        <DailyPlanSettings suggested={plan.suggestedLimit} suggestedByCategory={suggestedByCategory} />
       </div>
 
       <div className="rounded-xl bg-muted/50 p-3">

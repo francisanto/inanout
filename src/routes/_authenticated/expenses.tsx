@@ -89,10 +89,11 @@ function ExpensesPage() {
       />
 
 
-      <RangeFilter state={state} onChange={setState} />
-
       <section className="card-surface p-4 sm:p-5">
-        <h2 className="mb-4 text-base font-semibold">My spend</h2>
+        <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+          <h2 className="truncate text-base font-semibold">My spend</h2>
+          <RangeFilter state={state} onChange={setState} />
+        </div>
         {series.length === 0 ? (
           <EmptyState title="No expenses in this period" icon={TrendingDown} />
         ) : (

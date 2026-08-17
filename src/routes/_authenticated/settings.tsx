@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogOut, Plus, Share, Trash2, Wallet } from "lucide-react";
+import { Bell, CreditCard, LogOut, Pencil, Plus, Share, Trash2, User, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +28,7 @@ import {
   useCurrency,
   useDeleteRow,
   useInvalidateAll,
+  usePaymentMethods,
   useProfile,
   useReminders,
   useSaveRow,
@@ -60,26 +61,56 @@ const REMINDER_LABELS: Record<string, string> = {
 
 const HIDDEN_REMINDERS = new Set(["recurring_bills"]);
 
-function ProfileCard() {
-  const { data: profile, isLoading } = useProfile();
+/** A settings row that opens a dialog. */
+function SettingRow({
+  icon: Icon,
+  title,
+  subtitle,
+  action,
+}: {
+  icon: typeof User;
+  title: string;
+  subtitle: string;
+  action: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3">
+      <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold">{title}</p>
+        <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+      <div className="shrink-0">{action}</div>
+    </div>
+  );
+}
+
+function ProfileDialog() {
+  const { data: profile } = useProfile();
+  const accounts = useAccounts();
   const invalidate = useInvalidateAll();
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
     currency: "INR",
     salary_amount: "",
     salary_day: "",
+    salary_account_id: "",
   });
 
   useEffect(() => {
-    if (!profile) return;
+    if (!open || !profile) return;
     setForm({
       full_name: profile.full_name ?? "",
       currency: profile.currency ?? "INR",
       salary_amount: profile.salary_amount ? String(profile.salary_amount) : "",
       salary_day: profile.salary_day ? String(profile.salary_day) : "",
+      salary_account_id: profile.salary_account_id ?? "",
     });
-  }, [profile]);
+  }, [open, profile]);
 
   const save = async () => {
     if (!profile) return;
@@ -97,11 +128,13 @@ function ProfileCard() {
           currency: form.currency,
           salary_amount: form.salary_amount ? Number(form.salary_amount) : 0,
           salary_day: day,
+          salary_account_id: form.salary_account_id || null,
         } as never)
         .eq("id", profile.id);
       if (error) throw error;
       invalidate();
       toast.success("Profile updated");
+      setOpen(false);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -109,21 +142,34 @@ function ProfileCard() {
     }
   };
 
-  if (isLoading) return <LoadingBlock rows={3} />;
-
   return (
-    <section className="card-surface space-y-4 p-4 sm:p-5">
-      <h2 className="text-base font-semibold">Profile &amp; salary</h2>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Name">
-          <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+    <FormDialog
+      compact
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button size="sm" variant="outline">
+          <Pencil className="h-3.5 w-3.5" /> Edit
+        </Button>
+      }
+      title="Edit profile"
+      onSubmit={save}
+      submitting={busy}
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Name" className="col-span-2">
+          <Input
+            className="h-10"
+            value={form.full_name}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+          />
         </Field>
-        <Field label="Email">
-          <Input value={profile?.email ?? ""} readOnly disabled />
+        <Field label="Email" className="col-span-2">
+          <Input className="h-10" value={profile?.email ?? ""} readOnly disabled />
         </Field>
         <Field label="Currency">
           <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v })}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -137,19 +183,18 @@ function ProfileCard() {
         </Field>
         <Field label="Monthly salary">
           <Input
+            className="h-10"
             type="number"
             min="0"
             step="0.01"
+            inputMode="decimal"
             value={form.salary_amount}
             onChange={(e) => setForm({ ...form, salary_amount: e.target.value })}
           />
         </Field>
-        <Field
-          label="Salary day of month"
-          hint="Income is added automatically each month on this day."
-          className="sm:col-span-2"
-        >
+        <Field label="Salary day">
           <Input
+            className="h-10"
             type="number"
             min="1"
             max="31"
@@ -157,11 +202,165 @@ function ProfileCard() {
             onChange={(e) => setForm({ ...form, salary_day: e.target.value })}
           />
         </Field>
+        <Field label="Credit to account">
+          <Select
+            value={form.salary_account_id}
+            onValueChange={(v) => setForm({ ...form, salary_account_id: v })}
+          >
+            <SelectTrigger className="h-10">
+              <SelectValue placeholder="Choose" />
+            </SelectTrigger>
+            <SelectContent>
+              {(accounts.data ?? []).map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
       </div>
-      <Button onClick={() => void save()} disabled={busy}>
-        Save changes
-      </Button>
-    </section>
+      <p className="text-xs text-muted-foreground">
+        Income is added automatically each month on the salary day, into the account you pick.
+      </p>
+    </FormDialog>
+  );
+}
+
+function RemindersDialog() {
+  const reminders = useReminders();
+  const save = useSaveRow("reminders", "Reminder updated");
+  const [open, setOpen] = useState(false);
+  const rows = (reminders.data ?? []).filter((r) => !HIDDEN_REMINDERS.has(r.type));
+
+  return (
+    <FormDialog
+      compact
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button size="sm" variant="outline">
+          <Pencil className="h-3.5 w-3.5" /> Edit
+        </Button>
+      }
+      title="Reminders"
+      description="Choose what you want to be reminded about."
+      submitLabel="Done"
+      onSubmit={() => setOpen(false)}
+    >
+      {reminders.isLoading ? (
+        <LoadingBlock rows={2} />
+      ) : (
+        <ul className="divide-y divide-border rounded-xl border border-border px-3">
+          {rows.map((r) => (
+            <li key={r.id} className="flex items-center justify-between gap-3 py-2.5">
+              <span className="min-w-0 truncate text-sm">{REMINDER_LABELS[r.type] ?? r.type}</span>
+              <Switch
+                checked={r.enabled}
+                onCheckedChange={(v) => save.mutate({ id: r.id, enabled: v })}
+                aria-label={r.type}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </FormDialog>
+  );
+}
+
+function PaymentMethodsDialog() {
+  const { data: profile } = useProfile();
+  const current = usePaymentMethods();
+  const save = useSaveRow("profiles", "Payment methods updated");
+  const [open, setOpen] = useState(false);
+  const [list, setList] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    if (!open) return;
+    setList(current);
+    setDraft("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const add = () => {
+    const value = draft.trim();
+    if (!value) return;
+    if (list.some((m) => m.toLowerCase() === value.toLowerCase())) {
+      toast.error("That method already exists.");
+      return;
+    }
+    setList([...list, value]);
+    setDraft("");
+  };
+
+  const submit = async () => {
+    if (!profile?.id) return;
+    if (list.length === 0) {
+      toast.error("Keep at least one payment method.");
+      return;
+    }
+    await save.mutateAsync({ id: profile.id, payment_methods: list });
+    setOpen(false);
+  };
+
+  return (
+    <FormDialog
+      compact
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
+        <Button size="sm" variant="outline">
+          <Pencil className="h-3.5 w-3.5" /> Edit
+        </Button>
+      }
+      title="Payment methods"
+      description="These appear when you add an expense or income."
+      onSubmit={submit}
+      submitting={save.isPending}
+    >
+      <div className="flex gap-2">
+        <Input
+          className="h-10"
+          value={draft}
+          placeholder="e.g. Net banking"
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+        />
+        <Button type="button" size="sm" variant="secondary" onClick={add}>
+          Add
+        </Button>
+      </div>
+      <ul className="divide-y divide-border rounded-xl border border-border">
+        {list.map((m, i) => (
+          <li key={`${m}-${i}`} className="flex items-center gap-2 px-3 py-2">
+            <Input
+              className="h-9 flex-1"
+              value={m}
+              onChange={(e) => {
+                const next = [...list];
+                next[i] = e.target.value;
+                setList(next);
+              }}
+            />
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+              onClick={() => setList(list.filter((_, idx) => idx !== i))}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </FormDialog>
   );
 }
 
@@ -182,9 +381,10 @@ function AccountForm() {
 
   return (
     <FormDialog
+      compact
       trigger={
         <Button size="sm" variant="secondary">
-          <Plus className="h-4 w-4" /> Add account
+          <Plus className="h-4 w-4" /> Add
         </Button>
       }
       open={open}
@@ -193,13 +393,18 @@ function AccountForm() {
       onSubmit={submit}
       submitting={save.isPending}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Name">
-          <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Name" className="col-span-2">
+          <Input
+            className="h-10"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
         </Field>
         <Field label="Type">
           <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-            <SelectTrigger>
+            <SelectTrigger className="h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -211,10 +416,12 @@ function AccountForm() {
             </SelectContent>
           </Select>
         </Field>
-        <Field label="Opening balance" className="sm:col-span-2">
+        <Field label="Opening balance">
           <Input
+            className="h-10"
             type="number"
             step="0.01"
+            inputMode="decimal"
             value={form.opening_balance}
             onChange={(e) => setForm({ ...form, opening_balance: e.target.value })}
           />
@@ -271,35 +478,6 @@ function AccountsCard() {
     </section>
   );
 }
-
-function RemindersCard() {
-  const reminders = useReminders();
-  const save = useSaveRow("reminders", "Reminder updated");
-  const rows = (reminders.data ?? []).filter((r) => !HIDDEN_REMINDERS.has(r.type));
-
-  return (
-    <section className="card-surface p-4 sm:p-5">
-      <h2 className="mb-4 text-base font-semibold">Reminders</h2>
-      {reminders.isLoading ? (
-        <LoadingBlock rows={2} />
-      ) : (
-        <ul className="divide-y divide-border">
-          {rows.map((r) => (
-            <li key={r.id} className="flex items-center justify-between gap-3 py-2.5">
-              <span className="min-w-0 truncate text-sm">{REMINDER_LABELS[r.type] ?? r.type}</span>
-              <Switch
-                checked={r.enabled}
-                onCheckedChange={(v) => save.mutate({ id: r.id, enabled: v })}
-                aria-label={r.type}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -368,6 +546,12 @@ function InstallAppCard() {
 function SettingsPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { data: profile, isLoading } = useProfile();
+  const methods = usePaymentMethods();
+  const reminders = useReminders();
+  const enabledCount = (reminders.data ?? []).filter(
+    (r) => r.enabled && !HIDDEN_REMINDERS.has(r.type),
+  ).length;
 
   const signOut = async () => {
     await qc.cancelQueries();
@@ -378,11 +562,40 @@ function SettingsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Settings" description="Profile, accounts and reminders." />
+      <PageHeader title="Settings" description="Profile, payments, accounts and reminders." />
       <InstallAppCard />
-      <ProfileCard />
+
+      <section className="card-surface divide-y divide-border p-4 sm:p-5">
+        {isLoading ? (
+          <LoadingBlock rows={2} />
+        ) : (
+          <>
+            <SettingRow
+              icon={User}
+              title={profile?.full_name || "Your profile"}
+              subtitle={`${profile?.currency ?? "INR"} · salary ${
+                profile?.salary_amount ? formatMoney(Number(profile.salary_amount), profile.currency) : "not set"
+              }${profile?.salary_day ? ` on day ${profile.salary_day}` : ""}`}
+              action={<ProfileDialog />}
+            />
+            <SettingRow
+              icon={CreditCard}
+              title="Payment methods"
+              subtitle={methods.join(", ")}
+              action={<PaymentMethodsDialog />}
+            />
+            <SettingRow
+              icon={Bell}
+              title="Reminders"
+              subtitle={`${enabledCount} reminder${enabledCount === 1 ? "" : "s"} on`}
+              action={<RemindersDialog />}
+            />
+          </>
+        )}
+      </section>
+
       <AccountsCard />
-      <RemindersCard />
+
       <Button variant="outline" className="w-full" onClick={() => void signOut()}>
         <LogOut className="h-4 w-4" /> Sign out
       </Button>

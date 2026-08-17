@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import {
   ConfirmDelete,
   EmptyState,
-  GRANULARITY_OPTIONS,
   LoadingBlock,
   PageHeader,
   RangeFilter,
-  Segmented,
   StatCard,
   useRangeState,
 } from "@/components/kit";
@@ -35,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/income")({
 function IncomePage() {
   const currency = useCurrency();
   const { state, setState, range } = useRangeState("year");
-  const [granularity, setGranularity] = useState<Granularity>("monthly");
+  const granularity: Granularity = state.key === "today" || state.key === "week" ? "daily" : state.key === "month" ? "daily" : "monthly";
   const tx = useTransactions();
   const del = useDeleteRow("transactions", "Income deleted");
   const [editing, setEditing] = useState<Transaction | null>(null);
@@ -56,8 +54,6 @@ function IncomePage() {
         description="Salary, freelance, business and other money coming in."
         actions={<EntryDialog kind="income" trigger={<Button size="sm"><Plus className="h-4 w-4" /> Add income</Button>} />}
       />
-      <RangeFilter state={state} onChange={setState} />
-
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Total income" value={total} currency={currency} tone="positive" loading={tx.isLoading} />
         <StatCard label="Avg / month" value={total / months} currency={currency} loading={tx.isLoading} />
@@ -68,7 +64,7 @@ function IncomePage() {
       <section className="card-surface p-4 sm:p-5">
         <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
           <h2 className="truncate text-base font-semibold">Income trend</h2>
-          <Segmented value={granularity} onChange={setGranularity} options={GRANULARITY_OPTIONS} />
+          <RangeFilter state={state} onChange={setState} />
         </div>
         {series.length === 0 ? (
           <EmptyState title="No income in this period" icon={TrendingUp} />
