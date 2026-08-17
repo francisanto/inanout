@@ -91,6 +91,14 @@ export function useCurrency() {
   return data?.currency ?? "INR";
 }
 
+/** The user's editable payment-method list, falling back to the defaults. */
+export function usePaymentMethods(): string[] {
+  const { data } = useProfile();
+  const list = (data?.payment_methods ?? []).filter((m) => m && m.trim());
+  return list.length ? list : [...PAYMENT_METHODS];
+}
+
+
 function invalidateAll(qc: ReturnType<typeof useQueryClient>) {
   qc.invalidateQueries({ queryKey: ["data"] });
 }
