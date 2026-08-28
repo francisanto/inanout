@@ -131,7 +131,7 @@ export function EntryDialog({
             required
           />
         </Field>
-        <Field label="Date">
+        <Field label="Date" className="max-w-[180px]">
           <Input
             className="h-10 w-full min-w-0 px-2 text-sm [&::-webkit-date-and-time-value]:text-left [&::-webkit-calendar-picker-indicator]:ml-0 [&::-webkit-calendar-picker-indicator]:p-0"
             type="date"

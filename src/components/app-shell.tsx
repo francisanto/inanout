@@ -38,7 +38,7 @@ export const NAV_ITEMS = [
   { to: "/daily-plan", label: "Daily plan", icon: Gauge },
   { to: "/debts", label: "Debts", icon: CreditCard },
   { to: "/lending", label: "Lending", icon: ArrowLeftRight },
-  { to: "/savings", label: "Savings", icon: PiggyBank },
+  { to: "/planner", label: "Planner", icon: PiggyBank },
   { to: "/transactions", label: "Transactions", icon: ListOrdered },
   { to: "/people", label: "People", icon: Users },
   { to: "/settings", label: "Settings", icon: Settings },
