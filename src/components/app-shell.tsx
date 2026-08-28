@@ -1,6 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   ArrowLeftRight,
+  Bot,
   CreditCard,
   Gauge,
   LayoutDashboard,
@@ -41,10 +42,11 @@ export const NAV_ITEMS = [
   { to: "/planner", label: "Planner", icon: PiggyBank },
   { to: "/transactions", label: "Transactions", icon: ListOrdered },
   { to: "/people", label: "People", icon: Users },
+  { to: "/bot", label: "AI Bot", icon: Bot },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-const MOBILE_TAB_PATHS = new Set(["/dashboard", "/expenses", "/transactions", "/debts", "/settings"]);
+const MOBILE_TAB_PATHS = new Set(["/dashboard", "/expenses", "/bot", "/debts", "/settings"]);
 
 /** Pages reachable from the mobile “More” screen (not in the bottom tab bar). */
 export const MOBILE_MORE_ITEMS = NAV_ITEMS.filter(
@@ -58,7 +60,7 @@ const MOBILE_SHEET_ITEMS = NAV_ITEMS.filter((item) => item.to !== "/settings");
 const MOBILE_ITEMS = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
   { to: "/expenses", label: "Expenses", icon: TrendingDown },
-  { to: "/transactions", label: "Activity", icon: ListOrdered },
+  { to: "/bot", label: "AI Bot", icon: Bot },
   { to: "/debts", label: "Debts", icon: CreditCard },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
