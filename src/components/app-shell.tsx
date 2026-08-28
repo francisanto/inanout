@@ -35,7 +35,6 @@ export const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/expenses", label: "Expenses", icon: TrendingDown },
   { to: "/income", label: "Income", icon: TrendingUp },
-  { to: "/daily-plan", label: "Daily plan", icon: Gauge },
   { to: "/debts", label: "Debts", icon: CreditCard },
   { to: "/lending", label: "Lending", icon: ArrowLeftRight },
   { to: "/planner", label: "Planner", icon: PiggyBank },
